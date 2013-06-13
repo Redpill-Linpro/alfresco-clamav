@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.alfresco.maven</groupId>
+    <artifactId>alfresco-sdk-parent</artifactId>
+    <version>1.0.1</version>
+  </parent>
+
+  <groupId>org.redpill-linpro.alfresco.clamav</groupId>
+  <artifactId>alfresco-clamav</artifactId>
+  <version>1.0.0</version>
+  <packaging>pom</packaging>
+
+  <name>ClamAV support for Alfresco</name>
+  <description>Adds support for ClamAV for Alfresco, scanning all incoming files and denying if virus is found.</description>
+  <url>https://github.com/oakman/alfresco-clamav</url>
+
+  <developers>
+    <developer>
+      <id>nike</id>
+      <name>Niklas Ekman</name>
+      <email>niklas.ekman@redpill-linpro.com</email>
+      <organization>Redpill Linpro</organization>
+      <organizationUrl>http://www.redpill-linpro.com</organizationUrl>
+    </developer>
+  </developers>
+
+  <contributors>
+    <contributor />
+  </contributors>
+
+  <distributionManagement />
+
+  <scm>
+    <connection>scm:git:https://github.com/oakman/alfresco-clamav.git</connection>
+    <developerConnection>scm:git:https://github.com/oakman/alfresco-clamav.git</developerConnection>
+    <url>https://github.com/oakman/alfresco-clamav</url>
+    <tag>alfresco-clamav-1.0.0</tag>
+  </scm>
+
+  <issueManagement>
+    <system>GitHub</system>
+    <url>https://github.com/oakman/alfresco-clamav/issues</url>
+  </issueManagement>
+
+  <!-- -->
+  <!-- SDK properties have sensible defaults in the SDK parent, -->
+  <!-- but you can override the properties below to use another version. -->
+  <!-- For more available properties see the alfresco-sdk-parent POM. -->
+  <!-- -->
+  <properties>
+    <alfresco.groupId>org.alfresco</alfresco.groupId>
+    <alfresco.version>4.2.c</alfresco.version>
+    <app.log.root.level>WARN</app.log.root.level>
+    <alfresco.data.location>alf_data_dev</alfresco.data.location>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <!-- This controls which properties will be picked in src/test/properties for embedded run -->
+    <env>local</env>
+  </properties>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>2.2.1</version>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.9</version>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.6</source>
+          <target>1.6</target>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <exclude>**/*IntegrationTest.java</exclude>
+          </excludes>
+        </configuration>
+        <executions>
+          <execution>
+            <id>surefire-it</id>
+            <phase>integration-test</phase>
+            <goals>
+              <goal>test</goal>
+            </goals>
+            <configuration>
+              <excludes>
+                <exclude>none</exclude>
+              </excludes>
+              <includes>
+                <include>**/*IntegrationTest.java</include>
+              </includes>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+
+  </build>
+
+  <modules>
+    <module>clamav-repository</module>
+    <module>clamav-share</module>
+  </modules>
+</project>
