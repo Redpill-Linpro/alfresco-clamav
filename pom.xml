@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  
+  <parent>
+    <groupId>org.alfresco.maven</groupId>
+    <artifactId>alfresco-sdk-parent</artifactId>
+    <version>1.0.1</version>
+  </parent>
+  
+  <groupId>org.redpill-linpro.alfresco.repo.clamav</groupId>
+  <artifactId>alfresco-clamav</artifactId>
+  <version>1.0.0</version>
+  
+  <name>ClamAV support for Alfresco</name>
+  <description>Adds support for ClamAV for Alfresco, scanning all incoming files and denying if virus is found.</description>
+
+  <properties>
+    <alfresco.groupId>org.alfresco</alfresco.groupId>
+    <alfresco.version>4.2.c</alfresco.version>
+  </properties>
+
+  <developers>
+    <developer>
+      <id>nike</id>
+      <name>Niklas Ekman</name>
+      <email>niklas.ekman@redpill-linpro.com</email>
+      <organization>Redpill Linpro</organization>
+      <organizationUrl>http://www.redpill-linpro.com</organizationUrl>
+    </developer>
+  </developers>
+
+  <contributors>
+    <contributor />
+  </contributors>
+
+  <scm>
+    <connection>scm:git:https://github.com/oakman/alfresco-clamav.git</connection>
+    <developerConnection>scm:git:https://github.com/oakman/alfresco-clamav.git</developerConnection>
+    <url>https://github.com/oakman/alfresco-clamav</url>
+    <tag>alfresco-clamav-1.0.0</tag>
+  </scm>
+  
+  <issueManagement>
+    <system>GitHub</system>
+    <url>https://github.com/oakman/alfresco-clamav/issues</url>
+  </issueManagement>
+  
+</project>
