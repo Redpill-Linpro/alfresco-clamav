@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+  <bean id="acav.clusteredExecuter" class="org.redpill.alfresco.clamav.repo.jobs.ClusteredExecuter" abstract="true">
+    <property name="jobLockService" ref="jobLockService" />
+    <property name="transactionService" ref="TransactionService" />
+    <property name="lockTTL" value="30000" />
+    <property name="repositoryState" ref="repositoryState" />
+  </bean>
+
+  <bean id="acav.updateVirusDatabaseServiceJobDetail" class="org.springframework.scheduling.quartz.JobDetailBean">
+    <property name="jobClass" value="org.redpill.alfresco.clamav.repo.jobs.UpdateVirusDatabaseJob" />
+    <property name="jobDataAsMap">
+      <map>
+        <entry key="updateVirusDatabaseService" value-ref="acav.updateVirusDatabaseService" />
+      </map>
+    </property>
+  </bean>
+
+  <bean id="acav.updateVirusDatabaseServiceTrigger" class="org.alfresco.util.CronTriggerBean">
+    <property name="jobDetail" ref="acav.updateVirusDatabaseServiceJobDetail" />
+    <property name="scheduler" ref="schedulerFactory" />
+    <!-- cron expression is set to fire at 01:00 every day -->
+    <property name="cronExpression" value="0 0 1 1/1 * ? *" />
+  </bean>
+
+  <bean id="acav.scanSystemService" class="org.redpill.alfresco.clamav.repo.jobs.ScanSystemService" parent="acav.clusteredExecuter">
+    <property name="scanService" ref="acav.scanService" />
+    <property name="scanAction" ref="acav.scanAction" />
+    <property name="lockTTL" value="300000" />
+  </bean>
+
+  <bean id="acav.scanSystemServiceJobDetail" class="org.springframework.scheduling.quartz.JobDetailBean">
+    <property name="jobClass" value="org.redpill.alfresco.clamav.repo.jobs.ScanSystemJob" />
+    <property name="jobDataAsMap">
+      <map>
+        <entry key="scanSystemService" value-ref="acav.scanSystemService" />
+      </map>
+    </property>
+  </bean>
+
+  <bean id="acav.scanSystemServiceTrigger" class="org.alfresco.util.CronTriggerBean">
+    <property name="jobDetail" ref="acav.scanSystemServiceJobDetail" />
+    <property name="scheduler" ref="schedulerFactory" />
+    <!-- cron expression is set to fire at 02:00 every day -->
+    <property name="cronExpression" value="0 0 2 1/1 * ? *" />
+  </bean>
+
+</beans>

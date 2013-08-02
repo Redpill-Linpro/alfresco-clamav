@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<model name="acav:alfrecso_clam_av" xmlns="http://www.alfresco.org/model/dictionary/1.0">
+
+  <description>Alfresco ClamAV Model</description>
+  <author>Repill Linpro AB</author>
+  <version>1.0.0</version>
+
+  <imports>
+    <!-- Import Alfresco System Definitions -->
+    <import uri="http://www.alfresco.org/model/system/1.0" prefix="sys" />
+    <!-- Import Alfresco Dictionary Definitions -->
+    <import uri="http://www.alfresco.org/model/dictionary/1.0" prefix="d" />
+    <!-- Import Alfresco Content Domain Model Definitions -->
+    <import uri="http://www.alfresco.org/model/content/1.0" prefix="cm" />
+  </imports>
+
+  <namespaces>
+    <namespace uri="http://www.redpill-linpro.se/acav/model/1.0" prefix="acav" />
+  </namespaces>
+
+  <constraints>
+    <constraint name="acav:scanStatusList" type="LIST">
+      <parameter name="allowedValues">
+        <list>
+          <value>INFECTED</value>
+          <value>CLEAN</value>
+        </list>
+      </parameter>
+    </constraint>
+    <constraint name="acav:scanTypeList" type="LIST">
+      <parameter name="allowedValues">
+        <list>
+          <value>SYSTEM</value>
+          <value>SINGLE</value>
+        </list>
+      </parameter>
+    </constraint>
+  </constraints>
+
+  <types>
+    <type name="acav:scanHistory">
+      <parent>cm:content</parent>
+      <properties>
+        <property name="acav:scanLogDate">
+          <type>d:datetime</type>
+          <mandatory>true</mandatory>
+        </property>
+        <property name="acav:scanLog">
+          <type>d:text</type>
+          <mandatory>true</mandatory>
+        </property>
+        <property name="acav:scanType">
+          <type>d:text</type>
+          <constraints>
+            <constraint ref="acav:scanTypeList" />
+          </constraints>
+        </property>
+      </properties>
+    </type>
+  </types>
+
+  <aspects>
+    <aspect name="acav:scanned">
+      <title>Aspect for storing the scanned state of a node</title>
+      <properties>
+        <property name="acav:scanDate">
+          <type>d:datetime</type>
+          <mandatory>true</mandatory>
+        </property>
+        <property name="acav:scanStatus">
+          <type>d:text</type>
+          <constraints>
+            <constraint ref="acav:scanStatusList" />
+          </constraints>
+        </property>
+        <property name="acav:virusName">
+          <type>d:text</type>
+        </property>
+      </properties>
+    </aspect>
+  </aspects>
+
+</model>

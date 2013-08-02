@@ -15,6 +15,7 @@
     <!-- Defines the target WAR for this AMP. Allowed values: alfresco | share -->
     <!-- Defaults to a repository AMP -->
     <alfresco.client.war>share</alfresco.client.war>
+    <tomcat.home>${tomcat.share.home}</tomcat.home>
   </properties>
 
   <dependencyManagement>
@@ -33,13 +34,6 @@
     <dependency>
       <groupId>${alfresco.groupId}</groupId>
       <artifactId>alfresco-repository</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.8.1</version>
-      <scope>test</scope>
     </dependency>
   </dependencies>
 

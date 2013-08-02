@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.alfresco.maven</groupId>
     <artifactId>alfresco-sdk-parent</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
   </parent>
 
   <groupId>org.redpill-linpro.alfresco.clamav</groupId>
@@ -31,7 +33,11 @@
     <contributor />
   </contributors>
 
-  <distributionManagement />
+  <distributionManagement>
+    <repository />
+    <snapshotRepository />
+    <site />
+  </distributionManagement>
 
   <scm>
     <connection>scm:git:https://github.com/oakman/alfresco-clamav.git</connection>
@@ -58,6 +64,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <!-- This controls which properties will be picked in src/test/properties for embedded run -->
     <env>local</env>
+    <maven.surefire.version>2.15</maven.surefire.version>
   </properties>
 
   <build>
@@ -127,10 +134,181 @@
       </plugin>
     </plugins>
 
+    <pluginManagement>
+      <plugins>
+        <!-- also clean out local jar file in tomcat -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>2.5</version>
+          <configuration>
+            <filesets>
+              <fileset>
+                <directory>${tomcat.home}/shared/classes/alfresco/module/${project.artifactId}</directory>
+              </fileset>
+              <fileset>
+                <directory>${tomcat.home}/webapps/${alfresco.client.war}/WEB-INF/lib</directory>
+                <includes>
+                  <include>${project.build.finalName}.jar</include>
+                </includes>
+              </fileset>
+            </filesets>
+          </configuration>
+        </plugin>
+
+        <!-- Copy dependency jar files to local tomcat -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-dependency-plugin</artifactId>
+          <version>2.6</version>
+          <executions>
+            <execution>
+              <id>hot-copy-dependencies</id>
+              <goals>
+                <goal>copy-dependencies</goal>
+              </goals>
+              <configuration>
+                <outputDirectory>${tomcat.home}/webapps/${alfresco.client.war}/WEB-INF/lib</outputDirectory>
+                <overWriteReleases>false</overWriteReleases>
+                <overWriteSnapshots>false</overWriteSnapshots>
+                <overWriteIfNewer>true</overWriteIfNewer>
+                <includeScope>runtime</includeScope>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>2.5</version>
+          <executions>
+            <execution>
+              <id>hot-copy-resources</id>
+              <goals>
+                <goal>copy-resources</goal>
+              </goals>
+              <configuration>
+                <outputDirectory>${tomcat.home}/webapps/${alfresco.client.war}/WEB-INF/lib</outputDirectory>
+                <resources>
+                  <resource>
+                    <directory>${project.build.directory}/${project.build.finalName}/lib</directory>
+                    <includes>
+                      <include>${project.build.finalName}.jar</include>
+                    </includes>
+                  </resource>
+                </resources>
+              </configuration>
+            </execution>
+
+            <execution>
+              <id>hot-copy-web-resources</id>
+              <goals>
+                <goal>copy-resources</goal>
+              </goals>
+              <configuration>
+                <outputDirectory>${tomcat.home}/webapps/${alfresco.client.war}</outputDirectory>
+                <resources>
+                  <resource>
+                    <directory>src/main/amp/web</directory>
+                  </resource>
+                  <resource>
+                    <directory>${project.build.directory}/${project.build.finalName}/web</directory>
+                    <includes>
+                      <include>**/*.*</include>
+                    </includes>
+                  </resource>
+                </resources>
+              </configuration>
+            </execution>
+
+            <execution>
+              <id>hot-copy-config-resources</id>
+              <goals>
+                <goal>copy-resources</goal>
+              </goals>
+              <configuration>
+                <outputDirectory>${tomcat.home}/shared/classes/alfresco</outputDirectory>
+                <resources>
+                  <resource>
+                    <directory>src/main/amp/config/alfresco</directory>
+                    <includes>
+                      <include>**/*</include>
+                    </includes>
+                  </resource>
+                </resources>
+              </configuration>
+            </execution>
+          </executions>
+
+          <configuration>
+            <overwrite>true</overwrite>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
   </build>
+
+  <profiles>
+    <profile>
+      <id>dev</id>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-clean-plugin</artifactId>
+          </plugin>
+
+          <plugin>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>hot-copy-dependencies</id>
+                <phase>package</phase>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <artifactId>maven-resources-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>hot-copy-resources</id>
+                <phase>package</phase>
+              </execution>
+              <execution>
+                <id>hot-copy-web-resources</id>
+                <phase>package</phase>
+              </execution>
+              <execution>
+                <id>hot-copy-config-resources</id>
+                <phase>package</phase>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
   <modules>
     <module>clamav-repository</module>
     <module>clamav-share</module>
   </modules>
+
+  <!-- This repository is only needed to retrieve Alfresco parent POM. NOTE: This can be removed when/if Alfresco will be on Maven Central -->
+  <repositories>
+    <repository>
+      <id>alfresco-public</id>
+      <url>https://artifacts.alfresco.com/nexus/content/groups/public</url>
+    </repository>
+    <repository>
+      <id>alfresco-public-snapshots</id>
+      <url>https://artifacts.alfresco.com/nexus/content/groups/public-snapshots</url>
+      <snapshots>
+        <enabled>true</enabled>
+        <updatePolicy>daily</updatePolicy>
+      </snapshots>
+    </repository>
+  </repositories>
+
 </project>

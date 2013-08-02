@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="acav.node">
+
+  <resultMap id="result_protocol_identifier_uuid" type="HashMap">
+    <result property="protocol" column="protocol" jdbcType="VARCHAR" javaType="string" />
+    <result property="identifier" column="identifier" jdbcType="VARCHAR" javaType="string" />
+    <result property="uuid" column="uuid" jdbcType="VARCHAR" javaType="string" />
+  </resultMap>
+
+  <parameterMap id="parameter_file_path_map" type="map">
+    <parameter property="filePath" jdbcType="VARCHAR" javaType="string" />
+  </parameterMap>
+
+  <!-- Get total usage delta for a node -->
+  <select id="select_GetNodesByContentUrl" parameterType="list" resultType="int">
+    select 
+      alf_node.id 
+    from 
+      alf_node 
+    join 
+      alf_store on alf_node.store_id = alf_store.id 
+    where
+      alf_store.identifier = 'SpacesStore' AND 
+      alf_node.id in 
+        (
+          select node_id from alf_node_properties where node_id in
+            (
+              select np.node_id from alf_node_properties np where np.long_value in
+                (
+                  select cd.id from alf_content_data cd where cd.content_url_id in
+                    (
+                      select cu.id from alf_content_url cu where cu.content_url in
+                        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+                          #{item}
+                        </foreach>
+                    )
+                )
+            )
+        )
+  </select>
+
+</mapper>

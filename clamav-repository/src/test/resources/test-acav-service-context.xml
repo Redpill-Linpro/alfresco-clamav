@@ -1,0 +1,54 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+  <bean name="acav-properties" class="org.alfresco.config.JndiPropertiesFactoryBean">
+    <property name="locations">
+      <list>
+        <value>classpath:alfresco/subsystems/acav/default/acav.properties</value>
+        <value>classpath:test-acav.properties</value>
+      </list>
+    </property>
+    <property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE" />
+  </bean>
+
+  <bean name="common-placeholder-configurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer" abstract="true">
+    <property name="valueSeparator">
+      <null />
+    </property>
+    <property name="ignoreUnresolvablePlaceholders" value="true" />
+    <property name="searchSystemEnvironment" value="false" />
+  </bean>
+
+  <!-- Expand global properties and version information in bean definitions -->
+  <bean name="repository-properties" parent="common-placeholder-configurer">
+    <property name="properties" ref="acav-properties" />
+    <!-- Do not allow version information to be overriden -->
+    <property name="localOverride" value="false" />
+    <property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_NEVER" />
+    <!-- Order before shared-properties to give you a chance to override its parameters here -->
+    <property name="order" value="6" />
+  </bean>
+
+  <bean id="NodeService" class="org.mockito.Mockito" factory-method="mock">
+    <constructor-arg value="org.alfresco.service.cmr.repository.NodeService" />
+  </bean>
+
+  <bean id="LockService" class="org.mockito.Mockito" factory-method="mock">
+    <constructor-arg value="org.alfresco.service.cmr.lock.LockService" />
+  </bean>
+
+  <bean id="SearchService" class="org.mockito.Mockito" factory-method="mock">
+    <constructor-arg value="org.alfresco.service.cmr.search.SearchService" />
+  </bean>
+
+  <bean id="ContentService" class="org.mockito.Mockito" factory-method="mock">
+    <constructor-arg value="org.alfresco.service.cmr.repository.ContentService" />
+  </bean>
+
+  <bean id="FileFolderService" class="org.mockito.Mockito" factory-method="mock">
+    <constructor-arg value="org.alfresco.service.cmr.model.FileFolderService" />
+  </bean>
+
+
+</beans>

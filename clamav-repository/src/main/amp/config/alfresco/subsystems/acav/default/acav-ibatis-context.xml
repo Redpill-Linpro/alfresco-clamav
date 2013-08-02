@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+  <!-- MyBatis config for Alfresco ClamAV (using common datasource) -->
+  <bean id="acavSqlSessionFactory" class="org.alfresco.ibatis.HierarchicalSqlSessionFactoryBean">
+    <property name="useLocalCaches" value="${mybatis.useLocalCaches}" />
+    <property name="resourceLoader" ref="dialectResourceLoader" />
+    <property name="dataSource" ref="dataSource" />
+    <property name="configLocation">
+      <value>classpath:alfresco/ibatis/acav-SqlMapConfig.xml</value>
+    </property>
+  </bean>
+
+  <bean id="acavSqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate">
+    <constructor-arg index="0" ref="acavSqlSessionFactory" />
+  </bean>
+
+  <bean id="acav.nodeDao" class="org.redpill.alfresco.clamav.repo.service.impl.NodeDaoImpl">
+    <property name="sqlSessionTemplate" ref="acavSqlSessionTemplate" />
+  </bean>
+
+</beans>

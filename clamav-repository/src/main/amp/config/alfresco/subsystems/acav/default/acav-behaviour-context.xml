@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+  <bean id="acav.virusCheckerBehaviour" class="org.redpill.alfresco.clamav.repo.node.VirusCheckerBehaviour">
+    <property name="policyComponent" ref="policyComponent" />
+    <property name="scanService" ref="acav.scanService" />
+    <property name="scanAction" ref="acav.scanAction" />
+    <property name="jobLockService" ref="jobLockService" />
+    <property name="transactionService" ref="TransactionService" />
+    <property name="lockTTL" value="30000" />
+    <property name="repositoryState" ref="repositoryState" />
+  </bean>
+
+</beans>
