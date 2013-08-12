@@ -9,6 +9,7 @@ import org.alfresco.util.ParameterCheck;
 import org.redpill.alfresco.clamav.repo.service.ScanAction;
 import org.redpill.alfresco.clamav.repo.service.ScanService;
 import org.redpill.alfresco.clamav.repo.utils.ScanResult;
+import org.redpill.alfresco.clamav.repo.utils.ScanSummary;
 
 public class ScanSystemService extends ClusteredExecuter {
 
@@ -23,10 +24,10 @@ public class ScanSystemService extends ClusteredExecuter {
 
   @Override
   protected void executeInternal() {
-    final List<ScanResult> infected = AuthenticationUtil.runAsSystem(new RunAsWork<List<ScanResult>>() {
+    final List<ScanSummary> scanSummaryList = AuthenticationUtil.runAsSystem(new RunAsWork<List<ScanSummary>>() {
 
       @Override
-      public List<ScanResult> doWork() throws Exception {
+      public List<ScanSummary> doWork() throws Exception {
         return _scanService.scanSystem();
       }
 
@@ -41,8 +42,10 @@ public class ScanSystemService extends ClusteredExecuter {
           @Override
           public Void doWork() throws Exception {
 
-            for (ScanResult entry : infected) {
-              _scanAction.handleNode(entry.getNodeRef(), entry);
+            for (ScanSummary scanSummary : scanSummaryList) {
+              for (ScanResult scanResult : scanSummary.getInfectedList()) {
+                _scanAction.handleNode(scanResult.getNodeRef(), scanResult);
+              }
             }
 
             return null;

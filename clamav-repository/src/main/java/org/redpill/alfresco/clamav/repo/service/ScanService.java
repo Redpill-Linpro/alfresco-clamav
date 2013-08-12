@@ -7,6 +7,7 @@ import java.util.List;
 import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.redpill.alfresco.clamav.repo.utils.ScanResult;
+import org.redpill.alfresco.clamav.repo.utils.ScanSummary;
 
 public interface ScanService {
 
@@ -51,7 +52,7 @@ public interface ScanService {
    * 
    * @return Either null or a (maybe empty) list of ScanResult objects.
    */
-  List<ScanResult> scanSystem();
+  List<ScanSummary> scanSystem();
 
   /**
    * Scans the specified directory.
@@ -60,6 +61,6 @@ public interface ScanService {
    *          to scan
    * @return Either null or a (maybe empty) list of ScanResult objects.
    */
-  List<ScanResult> scanSystem(File directory);
+  ScanSummary scanSystem(File directory);
 
 }

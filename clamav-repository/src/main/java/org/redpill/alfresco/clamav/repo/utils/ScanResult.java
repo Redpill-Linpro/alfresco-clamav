@@ -14,6 +14,8 @@ public class ScanResult {
 
   private NodeRef _nodeRef = null;
 
+  private String _name = null;
+
   public boolean isFound() {
     return _found;
   }
@@ -44,6 +46,14 @@ public class ScanResult {
 
   public void setNodeRef(NodeRef nodeRef) {
     _nodeRef = nodeRef;
+  }
+
+  public String getName() {
+    return _name;
+  }
+
+  public void setName(String name) {
+    _name = name;
   }
 
 }

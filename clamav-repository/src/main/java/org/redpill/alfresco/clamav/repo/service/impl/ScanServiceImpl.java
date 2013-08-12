@@ -37,6 +37,7 @@ import org.redpill.alfresco.clamav.repo.service.ScanService;
 import org.redpill.alfresco.clamav.repo.service.SystemScanDirectoryRegistry;
 import org.redpill.alfresco.clamav.repo.utils.AcavUtils;
 import org.redpill.alfresco.clamav.repo.utils.ScanResult;
+import org.redpill.alfresco.clamav.repo.utils.ScanSummary;
 
 public class ScanServiceImpl extends AbstractService implements ScanService {
 
@@ -145,19 +146,19 @@ public class ScanServiceImpl extends AbstractService implements ScanService {
    * @see org.redpill.alfresco.clamav.repo.service.ScanService#scanSystem()
    */
   @Override
-  public List<ScanResult> scanSystem() {
-    List<ScanResult> result = new ArrayList<ScanResult>();
+  public List<ScanSummary> scanSystem() {
+    List<ScanSummary> result = new ArrayList<ScanSummary>();
 
     List<File> directories = _systemScanDirectoryRegistry.getDirectories();
 
     for (File directory : directories) {
-      List<ScanResult> found = scanSystem(directory);
+      ScanSummary scanSummary = scanSystem(directory);
 
-      if (found == null) {
+      if (scanSummary == null) {
         continue;
       }
 
-      result.addAll(found);
+      result.add(scanSummary);
     }
 
     return result;
@@ -169,9 +170,9 @@ public class ScanServiceImpl extends AbstractService implements ScanService {
    * @see org.redpill.alfresco.clamav.repo.service.ScanService#scanSystem(java.io.File)
    */
   @Override
-  public List<ScanResult> scanSystem(File directory) {
+  public ScanSummary scanSystem(File directory) {
     if (!directory.exists()) {
-      return new ArrayList<ScanResult>();
+      return null;
     }
 
     if (!_enabled) {
@@ -221,14 +222,37 @@ public class ScanServiceImpl extends AbstractService implements ScanService {
 
       LineIterator iterator = IOUtils.lineIterator(new StringReader(logMessage));
 
-      List<ScanResult> scanList = new ArrayList<ScanResult>();
       List<String> contentUrls = new ArrayList<String>();
       List<String> foundList = new ArrayList<String>();
+
+      ScanSummary scanSummary = new ScanSummary();
+
+      scanSummary.setDirectory(directory);
 
       while (iterator.hasNext()) {
         String line = iterator.nextLine();
 
         if (!line.startsWith(directory.getAbsolutePath())) {
+          line = line.toLowerCase();
+
+          if (line.startsWith("known viruses:")) {
+            scanSummary.setKnownViruses(Integer.parseInt(StringUtils.split(line, ":")[1].trim()));
+          } else if (line.startsWith("engine version:")) {
+            scanSummary.setEngineVersion(StringUtils.split(line, ":")[1].trim());
+          } else if (line.startsWith("scanned directories:")) {
+            scanSummary.setScannedDirectories(Integer.parseInt(StringUtils.split(line, ":")[1].trim()));
+          } else if (line.startsWith("scanned files:")) {
+            scanSummary.setScannedFiles(Integer.parseInt(StringUtils.split(line, ":")[1].trim()));
+          } else if (line.startsWith("infected files:")) {
+            scanSummary.setInfectedFiles(Integer.parseInt(StringUtils.split(line, ":")[1].trim()));
+          } else if (line.startsWith("data scanned:")) {
+            scanSummary.setDataScanned(StringUtils.split(line, ":")[1].trim());
+          } else if (line.startsWith("data read:")) {
+            scanSummary.setDataRead(StringUtils.split(line, ":")[1].trim());
+          } else if (line.startsWith("time:")) {
+            scanSummary.setTime(StringUtils.split(line, ":")[1].trim());
+          }
+
           continue;
         }
 
@@ -279,14 +303,15 @@ public class ScanServiceImpl extends AbstractService implements ScanService {
           scanResult.setDate(new Date());
           scanResult.setFound(true);
           scanResult.setNodeRef(nodeRef);
+          scanResult.setName((String) _nodeService.getProperty(nodeRef, ContentModel.PROP_NAME));
 
-          scanList.add(scanResult);
+          scanSummary.addScanResult(scanResult);
         }
       } finally {
         AcavUtils.closeQuietly(nodes);
       }
 
-      return scanList;
+      return scanSummary;
     } finally {
       _lockService.unlock(rootNode);
     }

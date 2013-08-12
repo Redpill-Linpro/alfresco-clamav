@@ -6,6 +6,7 @@ import org.alfresco.service.cmr.model.FileFolderService;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.util.ParameterCheck;
+import org.apache.commons.lang.StringUtils;
 import org.redpill.alfresco.clamav.repo.model.AcavModel;
 import org.redpill.alfresco.clamav.repo.service.AcavNodeService;
 import org.redpill.alfresco.clamav.repo.service.ScanHistoryService;
@@ -32,7 +33,10 @@ public class ScanHistoryServiceImpl implements ScanHistoryService, InitializingB
   @Override
   public void generic(ScanType scanType, String log) {
     ParameterCheck.mandatory("scanType", scanType);
-    ParameterCheck.mandatoryString("log", log);
+
+    if (StringUtils.isBlank(log)) {
+      return;
+    }
 
     NodeRef folderNodeRef = _acavNodeService.createFolderStructure(_acavNodeService.getScanHistoryFolderNodeRef());
 

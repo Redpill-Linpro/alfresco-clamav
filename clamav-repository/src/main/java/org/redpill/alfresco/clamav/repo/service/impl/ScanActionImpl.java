@@ -1,6 +1,7 @@
 package org.redpill.alfresco.clamav.repo.service.impl;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,6 +32,59 @@ public class ScanActionImpl implements ScanAction, InitializingBean {
 
   private AcavNodeService _acavNodeService;
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.redpill.alfresco.clamav.repo.service.ScanAction#handleNode(java.lang.String, java.lang.String)
+   */
+  @Override
+  public void handleNode(String nodeRef, String name, String virusName) {
+    ParameterCheck.mandatoryString("nodeRef", nodeRef);
+    ParameterCheck.mandatoryString("virusName", virusName);
+    ParameterCheck.mandatoryString("name", name);
+
+    ScanResult scanResult = new ScanResult();
+    scanResult.setDate(new Date());
+    scanResult.setFound(true);
+    scanResult.setNodeRef(new NodeRef(nodeRef));
+    scanResult.setVirusName(virusName);
+    scanResult.setName(name);
+
+    handleNode(nodeRef, scanResult);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.redpill.alfresco.clamav.repo.service.ScanAction#handleNode(java.lang.String, org.redpill.alfresco.clamav.repo.utils.ScanResult)
+   */
+  @Override
+  public void handleNode(String nodeRef, ScanResult scanResult) {
+    handleNode(new NodeRef(nodeRef), scanResult);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.redpill.alfresco.clamav.repo.service.ScanAction#handleNode(org.alfresco.service.cmr.repository.NodeRef, java.lang.String)
+   */
+  @Override
+  public void handleNode(NodeRef nodeRef, String name, String virusName) {
+    ScanResult scanResult = new ScanResult();
+    scanResult.setDate(new Date());
+    scanResult.setFound(true);
+    scanResult.setNodeRef(nodeRef);
+    scanResult.setVirusName(virusName);
+    scanResult.setName(name);
+
+    handleNode(nodeRef, scanResult);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.redpill.alfresco.clamav.repo.service.ScanAction#handleNode(org.alfresco.service.cmr.repository.NodeRef, org.redpill.alfresco.clamav.repo.utils.ScanResult)
+   */
   @Override
   public void handleNode(NodeRef nodeRef, ScanResult scanResult) {
     ParameterCheck.mandatory("nodeRef", nodeRef);

@@ -1,0 +1,6 @@
+<webscript>
+  <shortname>Admin Console ACAV Console</shortname>
+  <description>Administration Console - Alfresco ClamAV</description>
+  <url>/components/console/acav-console</url>
+  <family>admin-console</family>
+</webscript>
