@@ -1,0 +1,7 @@
+<webscript>
+   <shortname>Streams a declarative content item</shortname>
+   <url>/org/redpill/alfresco/clamav/scan?directory={directory?}</url>
+   <authentication>admin</authentication>
+   <format default="json">extension</format>
+   <family>Alfresco ClamAV</family>
+</webscript>

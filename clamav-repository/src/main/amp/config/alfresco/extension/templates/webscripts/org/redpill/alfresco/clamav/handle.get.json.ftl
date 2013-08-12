@@ -1,0 +1,3 @@
+<#compress>
+{ "result": true }
+</#compress>

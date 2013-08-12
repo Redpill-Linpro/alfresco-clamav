@@ -56,6 +56,11 @@
     <property name="systemScanDirectory" value="${dir.contentstore}" />
   </bean>
 
+  <bean id="acav.systemScanDirectoryContentStoreDeleted" class="org.redpill.alfresco.clamav.repo.utils.SystemScanDirectoryRegister">
+    <property name="systemScanDirectoryRegistry" ref="acav.systemScanDirectoryRegistry" />
+    <property name="systemScanDirectory" value="/tmp" />
+  </bean>
+
   <bean id="acav.scanService" class="org.redpill.alfresco.clamav.repo.service.impl.ScanServiceImpl" parent="acav.abstractService">
     <property name="scanCommand" ref="acav.scanCommand" />
     <property name="checkCommand" ref="acav.scanCheckCommand" />

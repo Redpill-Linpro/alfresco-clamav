@@ -1,0 +1,7 @@
+<webscript>
+   <shortname>Fetches the directories from the Scan Registry</shortname>
+   <url>/org/redpill/alfresco/clamav/handle?nodeRef={nodeRef}&amp;name={name}&amp;virusName={virusName}</url>
+   <authentication>admin</authentication>
+   <format default="json">extension</format>
+   <family>Alfresco ClamAV</family>
+</webscript>
