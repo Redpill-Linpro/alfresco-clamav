@@ -27,7 +27,11 @@ public class ScanGet extends DeclarativeWebScript implements InitializingBean {
     List<ScanSummary> scanSummaryList = new ArrayList<ScanSummary>();
 
     if (StringUtils.isNotBlank(directory)) {
-      scanSummaryList.add(_scanService.scanSystem(new File(directory)));
+      ScanSummary scanSummary = _scanService.scanSystem(new File(directory));
+
+      if (scanSummary != null) {
+        scanSummaryList.add(scanSummary);
+      }
     } else {
       scanSummaryList.addAll(_scanService.scanSystem());
     }

@@ -18,6 +18,7 @@ import org.redpill.alfresco.clamav.repo.model.AcavModel;
 import org.redpill.alfresco.clamav.repo.service.AcavNodeService;
 import org.redpill.alfresco.clamav.repo.service.ScanAction;
 import org.redpill.alfresco.clamav.repo.utils.ScanResult;
+import org.redpill.alfresco.clamav.repo.utils.ScanSummary;
 import org.springframework.beans.factory.InitializingBean;
 
 public class ScanActionImpl implements ScanAction, InitializingBean {
@@ -104,6 +105,15 @@ public class ScanActionImpl implements ScanAction, InitializingBean {
 
     if (scanResult.isFound()) {
       handleInfectedNode(nodeRef);
+    }
+  }
+
+  @Override
+  public void handleNodes(ScanSummary scanSummary) {
+    ParameterCheck.mandatory("scanSummary", scanSummary);
+
+    for (ScanResult scanResult : scanSummary.getScannedList()) {
+      handleNode(scanResult.getNodeRef(), scanResult);
     }
   }
 

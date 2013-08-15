@@ -200,7 +200,7 @@ public abstract class ClusteredExecuter implements InitializingBean {
   protected abstract void executeInternal();
 
   protected QName getLockQName() {
-    return QName.createQName(AcavModel.ACAV_URI, _localName);
+    return QName.createQName(AcavModel.ACAV_CORE_URI, _localName);
   }
 
   @Override

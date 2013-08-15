@@ -11,7 +11,7 @@
          "dataScanned": "${scanSummary.dataScanned?js_string}",
          "dataRead": "${scanSummary.dataRead?js_string}",
          "time": "${scanSummary.time?js_string}",
-         "scannedObject": "${scanSummary.scannedObject?js_string}",
+         "directory": "${scanSummary.directory?js_string}",
          "infectedNodes": [
             <#list scanSummary.infectedList as infected>
                {

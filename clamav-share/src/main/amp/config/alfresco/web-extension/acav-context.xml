@@ -26,13 +26,13 @@
   <bean id="evaluator.doclib.metadata.isScanned" parent="evaluator.doclib.action.hasAspect">
     <property name="aspects">
       <list>
-        <value>acav:scanned</value>
+        <value>acavc:scanned</value>
       </list>
     </property>
   </bean>
 
   <bean id="evaluator.doclib.action.isInfected" parent="evaluator.doclib.action.value">
-    <property name="accessor" value="node.properties.acav:scanStatus" />
+    <property name="accessor" value="node.properties.acavc:scanStatus" />
     <property name="comparator">
       <bean class="org.alfresco.web.evaluator.StringEqualsComparator">
         <property name="value" value="INFECTED" />

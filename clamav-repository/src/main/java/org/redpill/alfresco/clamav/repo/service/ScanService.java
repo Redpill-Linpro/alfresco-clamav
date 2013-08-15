@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.redpill.alfresco.clamav.repo.utils.ScanResult;
 import org.redpill.alfresco.clamav.repo.utils.ScanSummary;
 
 public interface ScanService {
@@ -18,7 +17,7 @@ public interface ScanService {
    *          nodeRef to scan
    * @return true if virus found, false otherwise
    */
-  ScanResult scanNode(NodeRef nodeRef);
+  ScanSummary scanNode(NodeRef nodeRef);
 
   /**
    * Scans content for viruses.
@@ -27,7 +26,7 @@ public interface ScanService {
    *          contentReader to scan
    * @return true if virus found, false otherwise
    */
-  ScanResult scanContent(ContentReader contentReader);
+  ScanSummary scanContent(ContentReader contentReader);
 
   /**
    * Scans a File for viruses.
@@ -36,7 +35,7 @@ public interface ScanService {
    *          file to scan
    * @return true if virus found, false otherwise
    */
-  ScanResult scanFile(File file);
+  ScanSummary scanFile(File file);
 
   /**
    * Scans a stream for viruses.
@@ -45,7 +44,7 @@ public interface ScanService {
    *          inputStream to scan
    * @return true if virus found, false otherwise
    */
-  ScanResult scanStream(InputStream inputStream);
+  ScanSummary scanStream(InputStream inputStream);
 
   /**
    * Scans the entire system with pre-configured directories.

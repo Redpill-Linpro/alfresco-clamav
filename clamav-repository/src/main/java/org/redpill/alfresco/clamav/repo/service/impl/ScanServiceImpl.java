@@ -38,6 +38,7 @@ import org.redpill.alfresco.clamav.repo.service.SystemScanDirectoryRegistry;
 import org.redpill.alfresco.clamav.repo.utils.AcavUtils;
 import org.redpill.alfresco.clamav.repo.utils.ScanResult;
 import org.redpill.alfresco.clamav.repo.utils.ScanSummary;
+import org.redpill.alfresco.clamav.repo.utils.ScanSummary.ScanType;
 
 public class ScanServiceImpl extends AbstractService implements ScanService {
 
@@ -67,7 +68,7 @@ public class ScanServiceImpl extends AbstractService implements ScanService {
    * @see org.redpill.alfresco.clamav.repo.service.ScanService#scanNode(org.alfresco .service.cmr.repository.NodeRef)
    */
   @Override
-  public ScanResult scanNode(NodeRef nodeRef) {
+  public ScanSummary scanNode(NodeRef nodeRef) {
     ParameterCheck.mandatory("nodeRef", nodeRef);
 
     if (!_nodeService.exists(nodeRef)) {
@@ -96,7 +97,7 @@ public class ScanServiceImpl extends AbstractService implements ScanService {
    * @see org.redpill.alfresco.clamav.repo.service.ScanService#scanContent(org.alfresco .service.cmr.repository.ContentReader)
    */
   @Override
-  public ScanResult scanContent(ContentReader contentReader) {
+  public ScanSummary scanContent(ContentReader contentReader) {
     ParameterCheck.mandatory("contentReader", contentReader);
 
     if (!contentReader.exists()) {
@@ -118,7 +119,7 @@ public class ScanServiceImpl extends AbstractService implements ScanService {
    * @see org.redpill.alfresco.clamav.repo.service.ScanService#scanFile(java.io.File)
    */
   @Override
-  public ScanResult scanFile(File file) {
+  public ScanSummary scanFile(File file) {
     return scanFile(file, null);
   }
 
@@ -128,7 +129,7 @@ public class ScanServiceImpl extends AbstractService implements ScanService {
    * @see org.redpill.alfresco.clamav.repo.service.ScanService#scanStream(java.io .InputStream)
    */
   @Override
-  public ScanResult scanStream(InputStream inputStream) {
+  public ScanSummary scanStream(InputStream inputStream) {
     ParameterCheck.mandatory("inputStream", inputStream);
 
     File tempFile = AcavUtils.copy(inputStream);
@@ -218,8 +219,6 @@ public class ScanServiceImpl extends AbstractService implements ScanService {
 
       writeLogMessage(logMessage);
 
-      _scanHistoryService.system(logMessage);
-
       LineIterator iterator = IOUtils.lineIterator(new StringReader(logMessage));
 
       List<String> contentUrls = new ArrayList<String>();
@@ -227,31 +226,15 @@ public class ScanServiceImpl extends AbstractService implements ScanService {
 
       ScanSummary scanSummary = new ScanSummary();
 
-      scanSummary.setDirectory(directory);
+      scanSummary.setScannedObject(directory);
+
+      scanSummary.setScanType(ScanType.SYSTEM);
 
       while (iterator.hasNext()) {
         String line = iterator.nextLine();
 
         if (!line.startsWith(directory.getAbsolutePath())) {
-          line = line.toLowerCase();
-
-          if (line.startsWith("known viruses:")) {
-            scanSummary.setKnownViruses(Integer.parseInt(StringUtils.split(line, ":")[1].trim()));
-          } else if (line.startsWith("engine version:")) {
-            scanSummary.setEngineVersion(StringUtils.split(line, ":")[1].trim());
-          } else if (line.startsWith("scanned directories:")) {
-            scanSummary.setScannedDirectories(Integer.parseInt(StringUtils.split(line, ":")[1].trim()));
-          } else if (line.startsWith("scanned files:")) {
-            scanSummary.setScannedFiles(Integer.parseInt(StringUtils.split(line, ":")[1].trim()));
-          } else if (line.startsWith("infected files:")) {
-            scanSummary.setInfectedFiles(Integer.parseInt(StringUtils.split(line, ":")[1].trim()));
-          } else if (line.startsWith("data scanned:")) {
-            scanSummary.setDataScanned(StringUtils.split(line, ":")[1].trim());
-          } else if (line.startsWith("data read:")) {
-            scanSummary.setDataRead(StringUtils.split(line, ":")[1].trim());
-          } else if (line.startsWith("time:")) {
-            scanSummary.setTime(StringUtils.split(line, ":")[1].trim());
-          }
+          parseScanSummary(scanSummary, line);
 
           continue;
         }
@@ -265,6 +248,10 @@ public class ScanServiceImpl extends AbstractService implements ScanService {
 
       List<Integer> ids = _nodeDao.selectByContentUrls(contentUrls);
 
+      if (ids == null || ids.size() == 0) {
+        return null;
+      }
+
       String query = "";
 
       for (Integer id : ids) {
@@ -276,7 +263,7 @@ public class ScanServiceImpl extends AbstractService implements ScanService {
       }
 
       query = "(" + query + ")";
-      query = query + " AND !@acav\\:scanStatus:\"INFECTED\"";
+      query = query + " AND !@acavc\\:scanStatus:\"INFECTED\"";
 
       ResultSet nodes = _searchService.query(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, SearchService.LANGUAGE_LUCENE, query);
 
@@ -285,6 +272,11 @@ public class ScanServiceImpl extends AbstractService implements ScanService {
           NodeRef nodeRef = nodes.getNodeRef(x);
 
           ContentData content = (ContentData) _nodeService.getProperty(nodeRef, ContentModel.PROP_CONTENT);
+
+          if (content == null) {
+            continue;
+          }
+
           String contentUrl = content.getContentUrl();
           contentUrl = StringUtils.replace(contentUrl, "store://", "");
 
@@ -305,15 +297,39 @@ public class ScanServiceImpl extends AbstractService implements ScanService {
           scanResult.setNodeRef(nodeRef);
           scanResult.setName((String) _nodeService.getProperty(nodeRef, ContentModel.PROP_NAME));
 
-          scanSummary.addScanResult(scanResult);
+          scanSummary.addInfected(scanResult);
         }
       } finally {
         AcavUtils.closeQuietly(nodes);
       }
 
+      _scanHistoryService.record(scanSummary);
+
       return scanSummary;
     } finally {
       _lockService.unlock(rootNode);
+    }
+  }
+
+  private void parseScanSummary(ScanSummary scanSummary, String line) {
+    line = line.toLowerCase();
+
+    if (line.startsWith("known viruses:")) {
+      scanSummary.setKnownViruses(Integer.parseInt(StringUtils.split(line, ":")[1].trim()));
+    } else if (line.startsWith("engine version:")) {
+      scanSummary.setEngineVersion(StringUtils.split(line, ":")[1].trim());
+    } else if (line.startsWith("scanned directories:")) {
+      scanSummary.setScannedDirectories(Integer.parseInt(StringUtils.split(line, ":")[1].trim()));
+    } else if (line.startsWith("scanned files:")) {
+      scanSummary.setScannedFiles(Integer.parseInt(StringUtils.split(line, ":")[1].trim()));
+    } else if (line.startsWith("infected files:")) {
+      scanSummary.setInfectedFiles(Integer.parseInt(StringUtils.split(line, ":")[1].trim()));
+    } else if (line.startsWith("data scanned:")) {
+      scanSummary.setDataScanned(StringUtils.split(line, ":")[1].trim());
+    } else if (line.startsWith("data read:")) {
+      scanSummary.setDataRead(StringUtils.split(line, ":")[1].trim());
+    } else if (line.startsWith("time:")) {
+      scanSummary.setTime(StringUtils.split(line, ":")[1].trim());
     }
   }
 
@@ -339,7 +355,7 @@ public class ScanServiceImpl extends AbstractService implements ScanService {
     return null;
   }
 
-  private ScanResult scanFile(File file, String options) {
+  private ScanSummary scanFile(File file, String options) {
     if (!_enabled) {
       if (LOG.isDebugEnabled()) {
         LOG.debug("Scan Service not enabled, skipping...");
@@ -393,6 +409,10 @@ public class ScanServiceImpl extends AbstractService implements ScanService {
 
       writeLogMessage(logMessage);
 
+      ScanSummary scanSummary = new ScanSummary();
+
+      scanSummary.setScanType(ScanType.SINGLE);
+
       ScanResult scanResult = new ScanResult();
       scanResult.setFound(result.getExitValue() == 1);
       scanResult.setDate(new Date());
@@ -401,9 +421,21 @@ public class ScanServiceImpl extends AbstractService implements ScanService {
         scanResult.setVirusName(extractVirusName(file.getAbsolutePath(), logMessage));
       }
 
-      _scanHistoryService.single(logMessage);
+      scanSummary.addScanned(scanResult);
 
-      return scanResult;
+      LineIterator iterator = IOUtils.lineIterator(new StringReader(logMessage));
+
+      scanSummary.setScannedObject(file);
+
+      while (iterator.hasNext()) {
+        String line = iterator.nextLine();
+
+        parseScanSummary(scanSummary, line);
+      }
+
+      _scanHistoryService.record(scanSummary);
+
+      return scanSummary;
     } finally {
       _lockService.unlock(rootNode);
     }

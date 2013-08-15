@@ -41,7 +41,7 @@ if (typeof Redpill == "undefined" || !Redpill) {
       Alfresco.util.ComponentManager.register(this);
 
       /* Load YUI Components */
-      Alfresco.util.YUILoaderHelper.require([ "button", "container", "datasource", "datatable", "paginator", "json", "history" ], this.onComponentsLoaded, this);
+      Alfresco.util.YUILoaderHelper.require([ "button", "container", "datasource", "datatable", "paginator", "json", "history", "tabview" ], this.onComponentsLoaded, this);
 
       /* Define panel handlers */
       var parent = this;
@@ -59,21 +59,14 @@ if (typeof Redpill == "undefined" || !Redpill) {
           * @method onLoad
           */
          onLoad : function onLoad() {
-            parent.widgets.scanButton = Alfresco.util.createYUIButton(parent, "scan-button", parent.onScanClick);
+            // widgets for the system scan
+            parent.setupSystemScanWidgets();
 
-            parent.widgets.directorySelect = Dom.get(parent.id + "-directorySelect");
-            parent.widgets.knownViruses = Dom.get(parent.id + "-known-viruses");
-            parent.widgets.engineVersion = Dom.get(parent.id + "-engine-version");
-            parent.widgets.scannedDirectories = Dom.get(parent.id + "-scanned-directories");
-            parent.widgets.scannedFiles = Dom.get(parent.id + "-scanned-files");
-            parent.widgets.infectedFiles = Dom.get(parent.id + "-infected-files");
-            parent.widgets.dataScanned = Dom.get(parent.id + "-data-scanned");
-            parent.widgets.dataRead = Dom.get(parent.id + "-data-read");
-            parent.widgets.time = Dom.get(parent.id + "-time");
-            parent.widgets.directory = Dom.get(parent.id + "-directory");
+            // widgets for the system log
+            parent.setupScanLogWidgets();
 
-            parent.widgets.details = Dom.get(parent.id + "-details");
-            parent.widgets.scanResult = Dom.get(parent.id + "-scan-result");
+            // widgets for the infected nodes list
+            parent.setupInfectedNodesWidgets();
          }
       });
 
@@ -112,6 +105,24 @@ if (typeof Redpill == "undefined" || !Redpill) {
          };
 
          Bubbling.addDefaultAction("action-link", fnActionHandler);
+
+         this.widgets.inputTabs = new YAHOO.widget.TabView(this.id + "-inputTabs");
+      },
+
+      setupSystemScanWidgets : function() {
+         this.widgets.scanButton = Alfresco.util.createYUIButton(this, "scan-button", this.onScanClick);
+         this.widgets.directorySelect = Dom.get(this.id + "-directorySelect");
+         this.widgets.knownViruses = Dom.get(this.id + "-known-viruses");
+         this.widgets.engineVersion = Dom.get(this.id + "-engine-version");
+         this.widgets.scannedDirectories = Dom.get(this.id + "-scanned-directories");
+         this.widgets.scannedFiles = Dom.get(this.id + "-scanned-files");
+         this.widgets.infectedFiles = Dom.get(this.id + "-infected-files");
+         this.widgets.dataScanned = Dom.get(this.id + "-data-scanned");
+         this.widgets.dataRead = Dom.get(this.id + "-data-read");
+         this.widgets.time = Dom.get(this.id + "-time");
+         this.widgets.directory = Dom.get(this.id + "-directory");
+         this.widgets.details = Dom.get(this.id + "-details");
+         this.widgets.scanResult = Dom.get(this.id + "-scan-result");
       },
 
       onScanClick : function() {
@@ -123,7 +134,8 @@ if (typeof Redpill == "undefined" || !Redpill) {
          var scanningMessage = Alfresco.util.PopupManager.displayMessage({
             displayTime : 0,
             text : '<span class="wait">' + $html(this.msg("message.scanning")) + '</span>',
-            noEscape : true
+            noEscape : true,
+            modal : true
          });
 
          scanningMessage.show();
@@ -137,6 +149,8 @@ if (typeof Redpill == "undefined" || !Redpill) {
             successCallback : {
                fn : function(res) {
                   if (res.json.result.length == 0) {
+                     scanningMessage.destroy();
+                     
                      return;
                   }
 
@@ -199,7 +213,7 @@ if (typeof Redpill == "undefined" || !Redpill) {
 
          var renderCellNodeRef = function(cell, record, column, data) {
             var docDetailsUrl = Alfresco.constants.URL_PAGECONTEXT + 'site/foobar/document-details?nodeRef=' + data;
-            
+
             cell.innerHTML = '<a href="' + docDetailsUrl + '" target="_blank">' + $html(data) + '</a>';
          };
 
@@ -276,6 +290,37 @@ if (typeof Redpill == "undefined" || !Redpill) {
             },
             cache : false
          });
+      },
+
+      setupScanLogWidgets : function() {
+         this.widgets.scanLogButton = Alfresco.util.createYUIButton(this, "scan-log-button", this.onScanLogClick);
+         this.widgets.scanLogFromDateField = Dom.get(this.id + "-scan-log-from-date");
+         this.widgets.scanLogFromTimeField = Dom.get(this.id + "-scan-log-from-time");
+         this.widgets.scanLogToDateField = Dom.get(this.id + "-scan-log-to-date");
+         this.widgets.scanLogToTimeField = Dom.get(this.id + "-scan-log-to-time");
+         
+         // Scan Log DataSource
+         this.widgets.scanLogDataSource = new YAHOO.util.DataSource(Alfresco.constants.PROXY_URI + "vgr/publishreport", {
+            responseType : YAHOO.util.DataSource.TYPE_JSON,
+            responseSchema : {
+               resultsList : "documents",
+               metaFields : {
+                  recordOffset : "startIndex",
+                  totalRecords : "totalRecords"
+               }
+            }
+         });
+
+         // Setup the main datatable
+         // this._setupDataTable();
+      },
+
+      onScanLogClick : function() {
+         
+      },
+
+      setupInfectedNodesWidgets : function() {
+
       }
 
    });

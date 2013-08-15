@@ -16,7 +16,7 @@ import org.alfresco.service.transaction.TransactionService;
 import org.redpill.alfresco.clamav.repo.jobs.ClusteredExecuter;
 import org.redpill.alfresco.clamav.repo.service.ScanAction;
 import org.redpill.alfresco.clamav.repo.service.ScanService;
-import org.redpill.alfresco.clamav.repo.utils.ScanResult;
+import org.redpill.alfresco.clamav.repo.utils.ScanSummary;
 import org.springframework.beans.factory.InitializingBean;
 
 public class VirusCheckerBehaviour implements OnCreateNodePolicy, AfterCreateVersionPolicy, BeforeCreateVersionPolicy, InitializingBean {
@@ -94,20 +94,20 @@ public class VirusCheckerBehaviour implements OnCreateNodePolicy, AfterCreateVer
 
       @Override
       protected void executeInternal() {
-        ScanResult scanResult;
+        ScanSummary scanSummary;
 
         try {
-          scanResult = _scanService.scanNode(nodeRef);
+          scanSummary = _scanService.scanNode(nodeRef);
         } catch (Exception ex) {
           ex.printStackTrace();
           return;
         }
 
-        if (scanResult == null) {
+        if (scanSummary == null) {
           return;
         }
 
-        _scanAction.handleNode(nodeRef, scanResult);
+        _scanAction.handleNode(nodeRef, scanSummary.getScannedList().get(0));
       }
     };
 

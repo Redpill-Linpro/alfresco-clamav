@@ -6,6 +6,12 @@ import java.util.List;
 
 public class ScanSummary {
 
+  public enum ScanType {
+    SYSTEM, SINGLE
+  }
+
+  private ScanType _scanType;
+
   private int _knownViruses;
 
   private String _engineVersion;
@@ -24,7 +30,17 @@ public class ScanSummary {
 
   private List<ScanResult> _infectedList = new ArrayList<ScanResult>();
 
-  private File _directory;
+  private List<ScanResult> _scannedList = new ArrayList<ScanResult>();
+
+  private File _scannedObject;
+
+  public ScanType getScanType() {
+    return _scanType;
+  }
+
+  public void setScanType(ScanType scanType) {
+    _scanType = scanType;
+  }
 
   public int getKnownViruses() {
     return _knownViruses;
@@ -98,16 +114,37 @@ public class ScanSummary {
     _infectedList = infectedList;
   }
 
-  public void addScanResult(ScanResult scanResult) {
-    _infectedList.add(scanResult);
+  public void addInfected(ScanResult infected) {
+    // only add infected files to this list
+    if (!infected.isFound()) {
+      return;
+    }
+
+    _infectedList.add(infected);
   }
 
-  public File getDirectory() {
-    return _directory;
+  public List<ScanResult> getScannedList() {
+    return _scannedList;
   }
 
-  public void setDirectory(File directory) {
-    _directory = directory;
+  public void setScannedList(List<ScanResult> scannedList) {
+    _scannedList = scannedList;
+  }
+
+  public void addScanned(ScanResult scanned) {
+    _scannedList.add(scanned);
+
+    if (scanned.isFound()) {
+      addInfected(scanned);
+    }
+  }
+
+  public File getScannedObject() {
+    return _scannedObject;
+  }
+
+  public void setScannedObject(File scannedObject) {
+    _scannedObject = scannedObject;
   }
 
 }

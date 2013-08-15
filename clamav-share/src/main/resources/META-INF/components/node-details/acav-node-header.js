@@ -24,8 +24,8 @@
    };
 
    Alfresco.component.NodeHeader.prototype._constructInfectedBannerHTML = function(response) {
-      var status = response.json.item.node.properties['acav:scanStatus'];
-      var virusName = response.json.item.node.properties['acav:virusName'];
+      var status = response.json.item.node.properties['acavc:scanStatus'];
+      var virusName = response.json.item.node.properties['acavc:virusName'];
 
       if (status != 'INFECTED') {
          return;

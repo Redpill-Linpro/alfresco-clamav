@@ -6,10 +6,10 @@ import org.alfresco.service.cmr.model.FileFolderService;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.util.ParameterCheck;
-import org.apache.commons.lang.StringUtils;
 import org.redpill.alfresco.clamav.repo.model.AcavModel;
 import org.redpill.alfresco.clamav.repo.service.AcavNodeService;
 import org.redpill.alfresco.clamav.repo.service.ScanHistoryService;
+import org.redpill.alfresco.clamav.repo.utils.ScanSummary;
 import org.springframework.beans.factory.InitializingBean;
 
 public class ScanHistoryServiceImpl implements ScanHistoryService, InitializingBean {
@@ -21,40 +21,26 @@ public class ScanHistoryServiceImpl implements ScanHistoryService, InitializingB
   private FileFolderService _fileFolderService;
 
   @Override
-  public void system(String log) {
-    generic(ScanType.SYSTEM, log);
-  }
+  public void record(ScanSummary scanSummary) {
+    ParameterCheck.mandatory("scanType", scanSummary);
 
-  @Override
-  public void single(String log) {
-    generic(ScanType.SINGLE, log);
-  }
-
-  @Override
-  public void generic(ScanType scanType, String log) {
-    ParameterCheck.mandatory("scanType", scanType);
-
-    if (StringUtils.isBlank(log)) {
-      return;
-    }
+    String scanType = scanSummary.getScanType().name();
 
     NodeRef folderNodeRef = _acavNodeService.createFolderStructure(_acavNodeService.getScanHistoryFolderNodeRef());
 
-    NodeRef logNodeRef = _fileFolderService.create(folderNodeRef, scanType.name() + "_scan_" + System.currentTimeMillis(), AcavModel.TYPE_SCAN_HISTORY).getNodeRef();
+    NodeRef logNodeRef = _fileFolderService.create(folderNodeRef, scanType + "_scan_" + System.currentTimeMillis(), AcavModel.TYPE_SCAN_HISTORY).getNodeRef();
 
-    _nodeService.setProperty(logNodeRef, AcavModel.PROP_SCAN_LOG_DATE, new Date());
-    _nodeService.setProperty(logNodeRef, AcavModel.PROP_SCAN_LOG, log);
-
-    switch (scanType) {
-      case SINGLE: {
-        _nodeService.setProperty(logNodeRef, AcavModel.PROP_SCAN_TYPE, ScanType.SINGLE.name());
-      }
-      case SYSTEM: {
-        _nodeService.setProperty(logNodeRef, AcavModel.PROP_SCAN_TYPE, ScanType.SYSTEM.name());
-      }
-      default: {
-      }
-    }
+    _nodeService.setProperty(logNodeRef, AcavModel.PROP_LOG_DATE, new Date());
+    _nodeService.setProperty(logNodeRef, AcavModel.PROP_DATA_READ, scanSummary.getDataRead());
+    _nodeService.setProperty(logNodeRef, AcavModel.PROP_DATA_SCANNED, scanSummary.getDataScanned());
+    _nodeService.setProperty(logNodeRef, AcavModel.PROP_ENGINE_VERSION, scanSummary.getEngineVersion());
+    _nodeService.setProperty(logNodeRef, AcavModel.PROP_INFECTED_FILES, scanSummary.getInfectedFiles());
+    _nodeService.setProperty(logNodeRef, AcavModel.PROP_KNOWN_VIRUSES, scanSummary.getKnownViruses());
+    _nodeService.setProperty(logNodeRef, AcavModel.PROP_SCANNED_DIRECTORIES, scanSummary.getScannedDirectories());
+    _nodeService.setProperty(logNodeRef, AcavModel.PROP_SCANNED_FILES, scanSummary.getScannedFiles());
+    _nodeService.setProperty(logNodeRef, AcavModel.PROP_SCANNED_OBJECT, scanSummary.getScannedObject().getAbsolutePath());
+    _nodeService.setProperty(logNodeRef, AcavModel.PROP_TIME, scanSummary.getTime());
+    _nodeService.setProperty(logNodeRef, AcavModel.PROP_SCAN_TYPE, scanType);
   }
 
   public void setAcavNodeService(AcavNodeService acavNodeService) {

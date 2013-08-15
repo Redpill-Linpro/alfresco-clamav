@@ -10,7 +10,7 @@ public class ScanResult {
 
   private Date _date = new Date();
 
-  private String _virusName = null;
+  private String _virusName = "";
 
   private NodeRef _nodeRef = null;
 

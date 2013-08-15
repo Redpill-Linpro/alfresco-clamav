@@ -4,7 +4,7 @@
       _setupMetadataRenderers.call(this);
 
       this.registerRenderer("infectedBanner", function(record, label) {
-         var virusName = record.node.properties['acav:virusName'];
+         var virusName = record.node.properties['acavc:virusName'];
 
          if (!virusName) {
             virusName = this.msg('unknown');
