@@ -23,6 +23,8 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.SearchService;
+import org.alfresco.service.cmr.site.SiteInfo;
+import org.alfresco.service.cmr.site.SiteService;
 import org.alfresco.util.ParameterCheck;
 import org.alfresco.util.TempFileProvider;
 import org.alfresco.util.exec.RuntimeExec;
@@ -61,6 +63,8 @@ public class ScanServiceImpl extends AbstractService implements ScanService {
   private NodeDao _nodeDao;
 
   private SearchService _searchService;
+
+  private SiteService _siteService;
 
   /*
    * (non-Javadoc)
@@ -148,21 +152,20 @@ public class ScanServiceImpl extends AbstractService implements ScanService {
    */
   @Override
   public List<ScanSummary> scanSystem() {
-    List<ScanSummary> result = new ArrayList<ScanSummary>();
+    List<SiteInfo> sites = _siteService.listSites(null, null);
 
-    List<File> directories = _systemScanDirectoryRegistry.getDirectories();
-
-    for (File directory : directories) {
-      ScanSummary scanSummary = scanSystem(directory);
-
-      if (scanSummary == null) {
-        continue;
-      }
-
-      result.add(scanSummary);
+    for (SiteInfo site : sites) {
+      scanSite(site);
     }
 
-    return result;
+    return null;
+  }
+
+  @Override
+  public List<ScanResult> scanSite(SiteInfo site) {
+
+
+    return null;
   }
 
   /*
@@ -473,6 +476,10 @@ public class ScanServiceImpl extends AbstractService implements ScanService {
     _searchService = searchService;
   }
 
+  public void setSiteService(SiteService siteService) {
+    _siteService = siteService;
+  }
+
   /*
    * (non-Javadoc)
    * 
@@ -490,6 +497,7 @@ public class ScanServiceImpl extends AbstractService implements ScanService {
     ParameterCheck.mandatory("systemScanDirectoryRegistry", _systemScanDirectoryRegistry);
     ParameterCheck.mandatory("nodeDao", _nodeDao);
     ParameterCheck.mandatory("searchService", _searchService);
+    ParameterCheck.mandatory("siteService", _siteService);
 
     _enabled = _checkCommand.execute().getExitValue() == 0;
   }
