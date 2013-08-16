@@ -11,6 +11,8 @@ import java.util.Map;
 
 import org.alfresco.error.AlfrescoRuntimeException;
 import org.alfresco.model.ContentModel;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.cmr.lock.LockStatus;
 import org.alfresco.service.cmr.lock.LockType;
 import org.alfresco.service.cmr.model.FileFolderService;
@@ -184,17 +186,9 @@ public class ScanServiceImpl extends AbstractService implements ScanService {
       return null;
     }
 
-    NodeRef rootNode = _acavNodeService.getRootNode();
-
-    if (_lockService.getLockStatus(rootNode) != LockStatus.NO_LOCK) {
-      if (LOG.isDebugEnabled()) {
-        LOG.debug("The Alfresco ClamAV system is currently locked...");
-      }
-
+    if (!lock()) {
       return null;
     }
-
-    _lockService.lock(rootNode, LockType.NODE_LOCK, 30);
 
     try {
       File logFile = TempFileProvider.createTempFile("acav_scan_", ".log");
@@ -307,7 +301,7 @@ public class ScanServiceImpl extends AbstractService implements ScanService {
 
       return scanSummary;
     } finally {
-      _lockService.unlock(rootNode);
+      unlock();
     }
   }
 
@@ -374,17 +368,9 @@ public class ScanServiceImpl extends AbstractService implements ScanService {
       return null;
     }
 
-    NodeRef rootNode = _acavNodeService.getRootNode();
-
-    if (_lockService.getLockStatus(rootNode) != LockStatus.NO_LOCK) {
-      if (LOG.isDebugEnabled()) {
-        LOG.debug("The Alfresco ClamAV system is currently locked...");
-      }
-
+    if (!lock()) {
       return null;
     }
-
-    _lockService.lock(rootNode, LockType.NODE_LOCK, 30);
 
     try {
       File logFile = TempFileProvider.createTempFile("acav_scan_", ".log");
@@ -437,8 +423,45 @@ public class ScanServiceImpl extends AbstractService implements ScanService {
 
       return scanSummary;
     } finally {
-      _lockService.unlock(rootNode);
+      unlock();
     }
+  }
+
+  private void unlock() {
+    AuthenticationUtil.runAsSystem(new RunAsWork<Void>() {
+
+      @Override
+      public Void doWork() throws Exception {
+        NodeRef rootNode = _acavNodeService.getRootNode();
+
+        _lockService.unlock(rootNode);
+
+        return null;
+      }
+
+    });
+  }
+
+  private boolean lock() {
+    return AuthenticationUtil.runAsSystem(new RunAsWork<Boolean>() {
+
+      @Override
+      public Boolean doWork() throws Exception {
+        NodeRef rootNode = _acavNodeService.getRootNode();
+
+        if (_lockService.getLockStatus(rootNode) != LockStatus.NO_LOCK) {
+          if (LOG.isDebugEnabled()) {
+            LOG.debug("The Alfresco ClamAV system is currently locked...");
+          }
+
+          return false;
+        }
+
+        _lockService.lock(rootNode, LockType.NODE_LOCK, 30);
+
+        return true;
+      }
+    });
   }
 
   public void setScanCommand(RuntimeExec scanCommand) {

@@ -42,7 +42,7 @@ public class VirusCheckerBehaviour implements OnCreateNodePolicy, AfterCreateVer
    */
   @Override
   public void onCreateNode(ChildAssociationRef childAssocRef) {
-    // checkForVirus(childAssocRef.getChildRef());
+    checkForVirus(childAssocRef.getChildRef());
   }
 
   /*
@@ -52,7 +52,7 @@ public class VirusCheckerBehaviour implements OnCreateNodePolicy, AfterCreateVer
    */
   @Override
   public void afterCreateVersion(NodeRef versionableNode, Version version) {
-    // checkForVirus(versionableNode);
+    checkForVirus(versionableNode);
   }
 
   @Override

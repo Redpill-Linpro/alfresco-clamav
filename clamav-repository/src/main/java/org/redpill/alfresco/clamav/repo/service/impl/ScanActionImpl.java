@@ -8,6 +8,8 @@ import java.util.Map;
 import org.alfresco.error.AlfrescoRuntimeException;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.policy.BehaviourFilter;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.cmr.model.FileFolderService;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
@@ -87,25 +89,34 @@ public class ScanActionImpl implements ScanAction, InitializingBean {
    * @see org.redpill.alfresco.clamav.repo.service.ScanAction#handleNode(org.alfresco.service.cmr.repository.NodeRef, org.redpill.alfresco.clamav.repo.utils.ScanResult)
    */
   @Override
-  public void handleNode(NodeRef nodeRef, ScanResult scanResult) {
+  public void handleNode(final NodeRef nodeRef, final ScanResult scanResult) {
     ParameterCheck.mandatory("nodeRef", nodeRef);
     ParameterCheck.mandatory("scanResult", scanResult);
 
-    // if the document already has the aspect, just exit
-    if (_nodeService.hasAspect(nodeRef, AcavModel.ASPECT_SCANNED)) {
-      return;
-    }
+    AuthenticationUtil.runAsSystem(new RunAsWork<Void>() {
 
-    // if it's a document already in the acavInfectedStore, just exit
-    if ("acavInfectedStore".equals(nodeRef.getStoreRef().getIdentifier())) {
-      return;
-    }
+      @Override
+      public Void doWork() throws Exception {
+        // if the document already has the aspect, just exit
+        if (_nodeService.hasAspect(nodeRef, AcavModel.ASPECT_SCANNED)) {
+          return null;
+        }
 
-    updateScannedProperties(nodeRef, scanResult);
+        // if it's a document already in the acavInfectedStore, just exit
+        if ("acavInfectedStore".equals(nodeRef.getStoreRef().getIdentifier())) {
+          return null;
+        }
 
-    if (scanResult.isFound()) {
-      handleInfectedNode(nodeRef);
-    }
+        updateScannedProperties(nodeRef, scanResult);
+
+        if (scanResult.isFound()) {
+          handleInfectedNode(nodeRef);
+        }
+
+        return null;
+      }
+    });
+
   }
 
   @Override
@@ -118,18 +129,26 @@ public class ScanActionImpl implements ScanAction, InitializingBean {
   }
 
   @Override
-  public void removeScannedStuff(NodeRef nodeRef) {
+  public void removeScannedStuff(final NodeRef nodeRef) {
     ParameterCheck.mandatory("nodeRef", nodeRef);
 
-    if (!_nodeService.exists(nodeRef)) {
-      return;
-    }
+    AuthenticationUtil.runAsSystem(new RunAsWork<Void>() {
 
-    if (!_nodeService.hasAspect(nodeRef, AcavModel.ASPECT_SCANNED)) {
-      return;
-    }
+      @Override
+      public Void doWork() throws Exception {
+        if (!_nodeService.exists(nodeRef)) {
+          return null;
+        }
 
-    _nodeService.removeAspect(nodeRef, AcavModel.ASPECT_SCANNED);
+        if (!_nodeService.hasAspect(nodeRef, AcavModel.ASPECT_SCANNED)) {
+          return null;
+        }
+
+        _nodeService.removeAspect(nodeRef, AcavModel.ASPECT_SCANNED);
+
+        return null;
+      }
+    });
   }
 
   private void updateScannedProperties(NodeRef nodeRef, ScanResult scanResult) {
@@ -152,6 +171,7 @@ public class ScanActionImpl implements ScanAction, InitializingBean {
     try {
       _fileFolderService.copy(nodeRef, virusVaultNodeRef, getUniqueName(virusVaultNodeRef, name));
     } catch (Exception ex) {
+      ex.printStackTrace();
       throw new AlfrescoRuntimeException(ex.getMessage(), ex);
     } finally {
       _behaviourFilter.enableBehaviour();
