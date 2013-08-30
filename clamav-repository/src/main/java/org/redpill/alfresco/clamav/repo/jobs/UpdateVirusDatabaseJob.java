@@ -21,7 +21,6 @@ public class UpdateVirusDatabaseJob implements Job {
 
         return null;
       }
-
     });
   }
 

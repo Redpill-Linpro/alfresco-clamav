@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.List;
 
+import nl.runnable.alfresco.annotations.RunAsSystem;
+
 import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.site.SiteInfo;
@@ -19,6 +21,7 @@ public interface ScanService {
    *          nodeRef to scan
    * @return true if virus found, false otherwise
    */
+  @RunAsSystem
   ScanSummary scanNode(NodeRef nodeRef);
 
   /**
@@ -28,6 +31,7 @@ public interface ScanService {
    *          contentReader to scan
    * @return true if virus found, false otherwise
    */
+  @RunAsSystem
   ScanSummary scanContent(ContentReader contentReader);
 
   /**
@@ -37,7 +41,20 @@ public interface ScanService {
    *          file to scan
    * @return true if virus found, false otherwise
    */
+  @RunAsSystem
   ScanSummary scanFile(File file);
+
+  /**
+   * Scans a File for viruses.
+   * 
+   * @param file
+   *          file to scan
+   * @param writeStatus
+   *          if to write status or not
+   * @return true if virus found, false otherwise
+   */
+  @RunAsSystem
+  ScanSummary scanFile(File file, boolean writeStatus);
 
   /**
    * Scans a stream for viruses.
@@ -46,6 +63,7 @@ public interface ScanService {
    *          inputStream to scan
    * @return true if virus found, false otherwise
    */
+  @RunAsSystem
   ScanSummary scanStream(InputStream inputStream);
 
   /**
@@ -53,6 +71,7 @@ public interface ScanService {
    * 
    * @return Either null or a (maybe empty) list of ScanResult objects.
    */
+  @RunAsSystem
   List<ScanSummary> scanSystem();
 
   /**
@@ -62,8 +81,10 @@ public interface ScanService {
    *          to scan
    * @return Either null or a (maybe empty) list of ScanResult objects.
    */
+  @RunAsSystem
   ScanSummary scanSystem(File directory);
 
+  @RunAsSystem
   List<ScanResult> scanSite(SiteInfo site);
 
 }

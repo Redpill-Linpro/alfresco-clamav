@@ -4,7 +4,9 @@ import java.util.List;
 
 import org.mybatis.spring.SqlSessionTemplate;
 import org.redpill.alfresco.clamav.repo.service.NodeDao;
+import org.springframework.stereotype.Component;
 
+@Component
 public class NodeDaoImpl implements NodeDao {
 
   private static final String SELECT_NODES_BY_CONTENT_URLS = "acav.node.select_GetNodesByContentUrl";
@@ -25,10 +27,6 @@ public class NodeDaoImpl implements NodeDao {
     List<Integer> result = (List<Integer>) _sqlSessionTemplate.selectList(SELECT_NODES_BY_CONTENT_URLS, contentUrls);
 
     return result;
-  }
-
-  public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
-    _sqlSessionTemplate = sqlSessionTemplate;
   }
 
 }

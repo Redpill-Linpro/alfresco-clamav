@@ -3,8 +3,11 @@ package org.redpill.alfresco.clamav.repo.service.impl;
 import java.util.Calendar;
 import java.util.Date;
 
+import nl.runnable.alfresco.annotations.RunAsSystem;
+import nl.runnable.alfresco.annotations.Transactional;
+
 import org.alfresco.model.ContentModel;
-import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.service.cmr.lock.LockService;
 import org.alfresco.service.cmr.model.FileFolderService;
 import org.alfresco.service.cmr.model.FileInfo;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
@@ -16,21 +19,34 @@ import org.alfresco.service.cmr.search.SearchParameters;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.QName;
-import org.alfresco.util.ParameterCheck;
+import org.alfresco.service.transaction.TransactionService;
 import org.apache.commons.lang.StringUtils;
+import org.redpill.alfresco.clamav.repo.model.AcavModel;
 import org.redpill.alfresco.clamav.repo.service.AcavNodeService;
 import org.redpill.alfresco.clamav.repo.utils.AcavUtils;
-import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-public class AcavNodeServiceImpl implements AcavNodeService, InitializingBean {
+@Component
+public class AcavNodeServiceImpl implements AcavNodeService {
 
+  @Autowired
   private SearchService _searchService;
 
+  @Autowired
   private NodeService _nodeService;
 
+  @Autowired
   private FileFolderService _fileFolderService;
 
+  @Autowired
   private PermissionService _permissionService;
+
+  @Autowired
+  private TransactionService _transactionService;
+
+  @Autowired
+  private LockService _lockService;
 
   /*
    * (non-Javadoc)
@@ -38,6 +54,8 @@ public class AcavNodeServiceImpl implements AcavNodeService, InitializingBean {
    * @see org.redpill.alfresco.clamav.repo.service.AcavNodeService#getRootNode()
    */
   @Override
+  @Transactional
+  @RunAsSystem
   public NodeRef getRootNode() {
     String query = "PATH:\"/app:company_home/app:alfresco_clamav\"";
 
@@ -61,6 +79,8 @@ public class AcavNodeServiceImpl implements AcavNodeService, InitializingBean {
     NodeRef acavStorageNode = _nodeService.createNode(companyHomeNodeRef, ContentModel.ASSOC_CONTAINS, QName.createQName(uri, validLocalName), ContentModel.TYPE_FOLDER).getChildRef();
 
     _nodeService.setProperty(acavStorageNode, ContentModel.PROP_NAME, "Alfresco ClamAV");
+
+    _lockService.unlock(acavStorageNode);
 
     return acavStorageNode;
   }
@@ -100,6 +120,8 @@ public class AcavNodeServiceImpl implements AcavNodeService, InitializingBean {
   }
 
   @Override
+  @RunAsSystem
+  @Transactional
   public NodeRef createFolderStructure(NodeRef parentNodeRef) {
     Calendar calendar = Calendar.getInstance();
     calendar.setTime(new Date());
@@ -115,27 +137,74 @@ public class AcavNodeServiceImpl implements AcavNodeService, InitializingBean {
     return dayFolder;
   }
 
-  private NodeRef getOrCreateSubFolder(final NodeRef parentNodeRef, final String subFolder) {
+  @RunAsSystem
+  @Transactional
+  @Override
+  public NodeRef getUpdateStatusNode() {
+    NodeRef rootNode = getRootNode();
+
+    NodeRef updateStatusNodeRef = _nodeService.getChildByName(rootNode, ContentModel.ASSOC_CONTAINS, "update_status");
+
+    if (updateStatusNodeRef != null) {
+      return updateStatusNodeRef;
+    }
+
+    return _fileFolderService.create(rootNode, "update_status", AcavModel.TYPE_UPDATE_STATUS).getNodeRef();
+  }
+
+  @Override
+  @RunAsSystem
+  @Transactional
+  public NodeRef getScanLockNode() {
+    return createLockNode("scan_lock");
+  }
+
+  @Override
+  @RunAsSystem
+  @Transactional
+  public NodeRef getUpdateLockNode() {
+    return createLockNode("update_lock");
+  }
+
+  @Override
+  @RunAsSystem
+  @Transactional
+  public NodeRef getSystemStatusNode() {
+    NodeRef rootNode = getRootNode();
+
+    NodeRef systemStatusNode = _nodeService.getChildByName(rootNode, ContentModel.ASSOC_CONTAINS, "system_status");
+
+    if (systemStatusNode != null) {
+      return systemStatusNode;
+    }
+
+    return _fileFolderService.create(rootNode, "system_status", AcavModel.TYPE_SYSTEM_STATUS).getNodeRef();
+  }
+
+  private NodeRef createLockNode(final String lockNodeName) {
+    NodeRef rootNode = getRootNode();
+
+    NodeRef lockNode = _nodeService.getChildByName(rootNode, ContentModel.ASSOC_CONTAINS, lockNodeName);
+
+    if (lockNode != null) {
+      return lockNode;
+    }
+
+    return _fileFolderService.create(rootNode, lockNodeName, ContentModel.TYPE_CONTENT).getNodeRef();
+  }
+
+  private NodeRef getOrCreateSubFolder(NodeRef parentNodeRef, String subFolder) {
     NodeRef existingFolder = _nodeService.getChildByName(parentNodeRef, ContentModel.ASSOC_CONTAINS, subFolder);
 
     NodeRef subFolderNodeRef;
 
     if (existingFolder == null) {
-      subFolderNodeRef = AuthenticationUtil.runAs(new AuthenticationUtil.RunAsWork<NodeRef>() {
+      FileInfo fileInfo = _fileFolderService.create(parentNodeRef, subFolder, ContentModel.TYPE_FOLDER);
 
-        @Override
-        public NodeRef doWork() throws Exception {
-          FileInfo fileInfo = _fileFolderService.create(parentNodeRef, subFolder, ContentModel.TYPE_FOLDER);
+      subFolderNodeRef = fileInfo.getNodeRef();
 
-          NodeRef nodeRef = fileInfo.getNodeRef();
-
-          // inherit permissions
-          _permissionService.setInheritParentPermissions(nodeRef, true);
-
-          return nodeRef;
-        }
-
-      }, AuthenticationUtil.getSystemUserName());
+      // inherit permissions
+      _permissionService.setInheritParentPermissions(subFolderNodeRef, true);
     } else {
       subFolderNodeRef = existingFolder;
     }
@@ -150,7 +219,8 @@ public class AcavNodeServiceImpl implements AcavNodeService, InitializingBean {
    *          query to execute
    * @return A ResultSet, has to be closed.
    */
-  private ResultSet search(String query) {
+  @RunAsSystem
+  public ResultSet search(String query) {
     SearchParameters searchParameters = new SearchParameters();
     searchParameters.setLanguage(SearchService.LANGUAGE_LUCENE);
     searchParameters.setQuery(query);
@@ -174,30 +244,6 @@ public class AcavNodeServiceImpl implements AcavNodeService, InitializingBean {
     } finally {
       AcavUtils.closeQuietly(result);
     }
-  }
-
-  public void setSearchService(SearchService searchService) {
-    _searchService = searchService;
-  }
-
-  public void setNodeService(NodeService nodeService) {
-    _nodeService = nodeService;
-  }
-
-  public void setFileFolderService(FileFolderService fileFolderService) {
-    _fileFolderService = fileFolderService;
-  }
-
-  public void setPermissionService(PermissionService permissionService) {
-    _permissionService = permissionService;
-  }
-
-  @Override
-  public void afterPropertiesSet() throws Exception {
-    ParameterCheck.mandatory("fileFolderService", _fileFolderService);
-    ParameterCheck.mandatory("nodeService", _nodeService);
-    ParameterCheck.mandatory("permissionService", _permissionService);
-    ParameterCheck.mandatory("searchService", _searchService);
   }
 
 }

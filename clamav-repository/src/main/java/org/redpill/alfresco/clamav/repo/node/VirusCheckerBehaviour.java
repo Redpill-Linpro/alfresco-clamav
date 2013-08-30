@@ -1,12 +1,14 @@
 package org.redpill.alfresco.clamav.repo.node;
 
-import org.alfresco.model.ContentModel;
+import javax.annotation.Resource;
+
+import nl.runnable.alfresco.behaviours.annotations.Behaviour;
+import nl.runnable.alfresco.behaviours.annotations.ClassPolicy;
+import nl.runnable.alfresco.behaviours.annotations.Event;
+
 import org.alfresco.repo.admin.RepositoryState;
 import org.alfresco.repo.lock.JobLockService;
 import org.alfresco.repo.node.NodeServicePolicies.OnCreateNodePolicy;
-import org.alfresco.repo.policy.Behaviour.NotificationFrequency;
-import org.alfresco.repo.policy.JavaBehaviour;
-import org.alfresco.repo.policy.PolicyComponent;
 import org.alfresco.repo.version.VersionServicePolicies.AfterCreateVersionPolicy;
 import org.alfresco.repo.version.VersionServicePolicies.BeforeCreateVersionPolicy;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
@@ -17,22 +19,30 @@ import org.redpill.alfresco.clamav.repo.jobs.ClusteredExecuter;
 import org.redpill.alfresco.clamav.repo.service.ScanAction;
 import org.redpill.alfresco.clamav.repo.service.ScanService;
 import org.redpill.alfresco.clamav.repo.utils.ScanSummary;
-import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-public class VirusCheckerBehaviour implements OnCreateNodePolicy, AfterCreateVersionPolicy, BeforeCreateVersionPolicy, InitializingBean {
+@Component
+@Behaviour(value = { "cm:content" }, event = Event.COMMIT)
+public class VirusCheckerBehaviour implements OnCreateNodePolicy, AfterCreateVersionPolicy, BeforeCreateVersionPolicy {
 
-  private PolicyComponent _policyComponent;
+  private final static long DEFAULT_LOCK_TTL = 30000;
 
+  @Autowired
   private ScanAction _scanAction;
 
+  @Resource(name = "acav.daemonScanService")
   private ScanService _scanService;
 
+  @Autowired
   private JobLockService _jobLockService;
 
-  private long _lockTTL;
+  private long _lockTTL = DEFAULT_LOCK_TTL;
 
+  @Autowired
   private RepositoryState _repositoryState;
 
+  @Autowired
   private TransactionService _transactionService;
 
   /*
@@ -41,8 +51,9 @@ public class VirusCheckerBehaviour implements OnCreateNodePolicy, AfterCreateVer
    * @see org.alfresco.repo.node.NodeServicePolicies.OnCreateNodePolicy#onCreateNode(org.alfresco.service.cmr.repository.ChildAssociationRef)
    */
   @Override
+  @ClassPolicy
   public void onCreateNode(ChildAssociationRef childAssocRef) {
-    // checkForVirus(childAssocRef.getChildRef());
+    checkForVirus(childAssocRef.getChildRef());
   }
 
   /*
@@ -51,11 +62,13 @@ public class VirusCheckerBehaviour implements OnCreateNodePolicy, AfterCreateVer
    * @see org.alfresco.repo.version.VersionServicePolicies.AfterCreateVersionPolicy#afterCreateVersion(org.alfresco.service.cmr.repository.NodeRef, org.alfresco.service.cmr.version.Version)
    */
   @Override
+  @ClassPolicy
   public void afterCreateVersion(NodeRef versionableNode, Version version) {
-    // checkForVirus(versionableNode);
+    checkForVirus(versionableNode);
   }
 
   @Override
+  @ClassPolicy
   public void beforeCreateVersion(final NodeRef versionableNode) {
     ClusteredExecuter executer = new ClusteredExecuter("VirusCheckerBehaviour") {
 
@@ -117,46 +130,6 @@ public class VirusCheckerBehaviour implements OnCreateNodePolicy, AfterCreateVer
     executer.setTransactionService(_transactionService);
 
     executer.execute();
-  }
-
-  public void setPolicyComponent(PolicyComponent policyComponent) {
-    _policyComponent = policyComponent;
-  }
-
-  public void setScanService(ScanService scanService) {
-    _scanService = scanService;
-  }
-
-  public void setScanAction(ScanAction scanAction) {
-    _scanAction = scanAction;
-  }
-
-  public void setJobLockService(JobLockService jobLockService) {
-    _jobLockService = jobLockService;
-  }
-
-  public void setLockTTL(long lockTTL) {
-    _lockTTL = lockTTL;
-  }
-
-  public void setRepositoryState(RepositoryState repositoryState) {
-    _repositoryState = repositoryState;
-  }
-
-  public void setTransactionService(TransactionService transactionService) {
-    _transactionService = transactionService;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet()
-   */
-  @Override
-  public void afterPropertiesSet() throws Exception {
-    _policyComponent.bindClassBehaviour(OnCreateNodePolicy.QNAME, ContentModel.TYPE_CONTENT, new JavaBehaviour(this, "onCreateNode", NotificationFrequency.TRANSACTION_COMMIT));
-    _policyComponent.bindClassBehaviour(AfterCreateVersionPolicy.QNAME, ContentModel.TYPE_CONTENT, new JavaBehaviour(this, "afterCreateVersion", NotificationFrequency.TRANSACTION_COMMIT));
-    _policyComponent.bindClassBehaviour(BeforeCreateVersionPolicy.QNAME, ContentModel.TYPE_CONTENT, new JavaBehaviour(this, "beforeCreateVersion", NotificationFrequency.TRANSACTION_COMMIT));
   }
 
 }
