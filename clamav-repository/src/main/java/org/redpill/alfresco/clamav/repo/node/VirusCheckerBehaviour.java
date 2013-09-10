@@ -3,14 +3,13 @@ package org.redpill.alfresco.clamav.repo.node;
 import javax.annotation.Resource;
 
 import nl.runnable.alfresco.behaviours.annotations.Behaviour;
-import nl.runnable.alfresco.behaviours.annotations.ClassPolicy;
 import nl.runnable.alfresco.behaviours.annotations.Event;
 
 import org.alfresco.repo.admin.RepositoryState;
 import org.alfresco.repo.lock.JobLockService;
 import org.alfresco.repo.node.NodeServicePolicies.OnCreateNodePolicy;
+import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.version.VersionServicePolicies.AfterCreateVersionPolicy;
-import org.alfresco.repo.version.VersionServicePolicies.BeforeCreateVersionPolicy;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.version.Version;
@@ -22,9 +21,13 @@ import org.redpill.alfresco.clamav.repo.utils.ScanSummary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+/**
+ * @author niklas
+ * 
+ */
 @Component
 @Behaviour(value = { "cm:content" }, event = Event.COMMIT)
-public class VirusCheckerBehaviour implements OnCreateNodePolicy, AfterCreateVersionPolicy, BeforeCreateVersionPolicy {
+public class VirusCheckerBehaviour implements OnCreateNodePolicy, AfterCreateVersionPolicy {
 
   private final static long DEFAULT_LOCK_TTL = 30000;
 
@@ -45,14 +48,16 @@ public class VirusCheckerBehaviour implements OnCreateNodePolicy, AfterCreateVer
   @Autowired
   private TransactionService _transactionService;
 
+  @Resource(name = "policyBehaviourFilter")
+  private BehaviourFilter _behaviourFilter;
+
   /*
    * (non-Javadoc)
    * 
    * @see org.alfresco.repo.node.NodeServicePolicies.OnCreateNodePolicy#onCreateNode(org.alfresco.service.cmr.repository.ChildAssociationRef)
    */
   @Override
-  @ClassPolicy
-  public void onCreateNode(ChildAssociationRef childAssocRef) {
+  public void onCreateNode(final ChildAssociationRef childAssocRef) {
     checkForVirus(childAssocRef.getChildRef());
   }
 
@@ -62,34 +67,32 @@ public class VirusCheckerBehaviour implements OnCreateNodePolicy, AfterCreateVer
    * @see org.alfresco.repo.version.VersionServicePolicies.AfterCreateVersionPolicy#afterCreateVersion(org.alfresco.service.cmr.repository.NodeRef, org.alfresco.service.cmr.version.Version)
    */
   @Override
-  @ClassPolicy
-  public void afterCreateVersion(NodeRef versionableNode, Version version) {
+  public void afterCreateVersion(final NodeRef versionableNode, Version version) {
     checkForVirus(versionableNode);
   }
 
-  @Override
-  @ClassPolicy
-  public void beforeCreateVersion(final NodeRef versionableNode) {
-    ClusteredExecuter executer = new ClusteredExecuter("VirusCheckerBehaviour") {
-
-      @Override
-      protected String getJobName() {
-        return "VirusCheckerBehaviour.beforeCreateVersion";
-      }
-
-      @Override
-      protected void executeInternal() {
-        _scanAction.removeScannedStuff(versionableNode);
-      }
-    };
-
-    executer.setJobLockService(_jobLockService);
-    executer.setLockTTL(_lockTTL);
-    executer.setRepositoryState(_repositoryState);
-    executer.setTransactionService(_transactionService);
-
-    executer.execute();
-  }
+  // @Override
+  // public void beforeCreateVersion(final NodeRef versionableNode) {
+  // ClusteredExecuter executer = new ClusteredExecuter("VirusCheckerBehaviour") {
+  //
+  // @Override
+  // protected String getJobName() {
+  // return "VirusCheckerBehaviour.beforeCreateVersion";
+  // }
+  //
+  // @Override
+  // protected void executeInternal() {
+  // _scanAction.removeScannedStuff(versionableNode);
+  // }
+  // };
+  //
+  // executer.setJobLockService(_jobLockService);
+  // executer.setLockTTL(_lockTTL);
+  // executer.setRepositoryState(_repositoryState);
+  // executer.setTransactionService(_transactionService);
+  //
+  // executer.execute();
+  // }
 
   /**
    * Checks a nodeRef for viruses. If found, handles it too. Uses a clustered executer that makes it cluster safe, i.e. only one node in the cluster will check it.
@@ -120,6 +123,8 @@ public class VirusCheckerBehaviour implements OnCreateNodePolicy, AfterCreateVer
           return;
         }
 
+        _scanAction.removeScannedStuff(nodeRef);
+
         _scanAction.handleNode(nodeRef, scanSummary.getScannedList().get(0));
       }
     };
@@ -128,6 +133,8 @@ public class VirusCheckerBehaviour implements OnCreateNodePolicy, AfterCreateVer
     executer.setLockTTL(_lockTTL);
     executer.setRepositoryState(_repositoryState);
     executer.setTransactionService(_transactionService);
+
+    _behaviourFilter.disableBehaviour();
 
     executer.execute();
   }
