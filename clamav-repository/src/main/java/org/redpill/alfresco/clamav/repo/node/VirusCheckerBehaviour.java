@@ -71,29 +71,6 @@ public class VirusCheckerBehaviour implements OnCreateNodePolicy, AfterCreateVer
     checkForVirus(versionableNode);
   }
 
-  // @Override
-  // public void beforeCreateVersion(final NodeRef versionableNode) {
-  // ClusteredExecuter executer = new ClusteredExecuter("VirusCheckerBehaviour") {
-  //
-  // @Override
-  // protected String getJobName() {
-  // return "VirusCheckerBehaviour.beforeCreateVersion";
-  // }
-  //
-  // @Override
-  // protected void executeInternal() {
-  // _scanAction.removeScannedStuff(versionableNode);
-  // }
-  // };
-  //
-  // executer.setJobLockService(_jobLockService);
-  // executer.setLockTTL(_lockTTL);
-  // executer.setRepositoryState(_repositoryState);
-  // executer.setTransactionService(_transactionService);
-  //
-  // executer.execute();
-  // }
-
   /**
    * Checks a nodeRef for viruses. If found, handles it too. Uses a clustered executer that makes it cluster safe, i.e. only one node in the cluster will check it.
    * 
