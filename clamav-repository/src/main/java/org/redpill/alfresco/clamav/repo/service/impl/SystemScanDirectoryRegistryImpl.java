@@ -5,13 +5,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.redpill.alfresco.clamav.repo.service.SystemScanDirectoryRegistry;
+import org.springframework.stereotype.Component;
 
+@Component
 public class SystemScanDirectoryRegistryImpl implements SystemScanDirectoryRegistry {
 
   private List<File> _directories = new ArrayList<File>();
 
   @Override
   public void addDirectory(File directory) {
+    if (directory == null) {
+      return;
+    }
+
     if (!directory.exists()) {
       throw new RuntimeException("The directory '" + directory.getAbsolutePath() + "' does not exist!");
     }

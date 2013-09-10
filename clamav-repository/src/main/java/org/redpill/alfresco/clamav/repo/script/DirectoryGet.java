@@ -6,21 +6,28 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.alfresco.util.ParameterCheck;
+import nl.runnable.alfresco.webscripts.annotations.Authentication;
+import nl.runnable.alfresco.webscripts.annotations.AuthenticationType;
+import nl.runnable.alfresco.webscripts.annotations.HttpMethod;
+import nl.runnable.alfresco.webscripts.annotations.Uri;
+import nl.runnable.alfresco.webscripts.annotations.WebScript;
+
 import org.redpill.alfresco.clamav.repo.service.SystemScanDirectoryRegistry;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.extensions.webscripts.Cache;
-import org.springframework.extensions.webscripts.DeclarativeWebScript;
-import org.springframework.extensions.webscripts.Status;
-import org.springframework.extensions.webscripts.WebScriptRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.extensions.webscripts.WebScriptResponse;
+import org.springframework.stereotype.Component;
 
-public class DirectoryGet extends DeclarativeWebScript implements InitializingBean {
+@Component
+@WebScript(description = "Fetches the directories from the Scan Registry", families = { "Alfresco ClamAV" })
+@Authentication(AuthenticationType.ADMIN)
+public class DirectoryGet {
 
+  @Autowired
   private SystemScanDirectoryRegistry _systemScanDirectoryRegistry;
 
-  @Override
-  protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
-    Map<String, Object> result = new HashMap<String, Object>();
+  @Uri(method = HttpMethod.GET, value = "/org/redpill/alfresco/clamav/directory", defaultFormat = "json")
+  public Map<String, Object> handleTemplate(WebScriptResponse response) {
+    Map<String, Object> model = new HashMap<String, Object>();
 
     List<String> directories = new ArrayList<String>();
 
@@ -28,18 +35,9 @@ public class DirectoryGet extends DeclarativeWebScript implements InitializingBe
       directories.add(directory.getAbsolutePath());
     }
 
-    result.put("directories", directories);
+    model.put("directories", directories);
 
-    return result;
-  }
-
-  public void setSystemScanDirectoryRegistry(SystemScanDirectoryRegistry systemScanDirectoryRegistry) {
-    _systemScanDirectoryRegistry = systemScanDirectoryRegistry;
-  }
-
-  @Override
-  public void afterPropertiesSet() throws Exception {
-    ParameterCheck.mandatory("systemScanDirectoryRegistry", _systemScanDirectoryRegistry);
+    return model;
   }
 
 }

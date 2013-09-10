@@ -12,14 +12,19 @@ import org.redpill.alfresco.clamav.repo.model.AcavModel;
 import org.redpill.alfresco.clamav.repo.service.AcavNodeService;
 import org.redpill.alfresco.clamav.repo.service.ScanHistoryService;
 import org.redpill.alfresco.clamav.repo.utils.ScanSummary;
-import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-public class ScanHistoryServiceImpl implements ScanHistoryService, InitializingBean {
+@Component
+public class ScanHistoryServiceImpl implements ScanHistoryService {
 
+  @Autowired
   private AcavNodeService _acavNodeService;
 
+  @Autowired
   private NodeService _nodeService;
 
+  @Autowired
   private FileFolderService _fileFolderService;
 
   @Override
@@ -52,25 +57,6 @@ public class ScanHistoryServiceImpl implements ScanHistoryService, InitializingB
         return null;
       }
     });
-  }
-
-  public void setAcavNodeService(AcavNodeService acavNodeService) {
-    _acavNodeService = acavNodeService;
-  }
-
-  public void setNodeService(NodeService nodeService) {
-    _nodeService = nodeService;
-  }
-
-  public void setFileFolderService(FileFolderService fileFolderService) {
-    _fileFolderService = fileFolderService;
-  }
-
-  @Override
-  public void afterPropertiesSet() throws Exception {
-    ParameterCheck.mandatory("acavNodeService", _acavNodeService);
-    ParameterCheck.mandatory("nodeService", _nodeService);
-    ParameterCheck.mandatory("fileFolderService", _fileFolderService);
   }
 
 }

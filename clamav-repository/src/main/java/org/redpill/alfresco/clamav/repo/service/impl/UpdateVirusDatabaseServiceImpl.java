@@ -4,6 +4,9 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
+
 import org.alfresco.error.AlfrescoRuntimeException;
 import org.alfresco.service.cmr.lock.LockStatus;
 import org.alfresco.service.cmr.lock.LockType;
@@ -11,25 +14,28 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.util.TempFileProvider;
 import org.alfresco.util.exec.RuntimeExec;
 import org.alfresco.util.exec.RuntimeExec.ExecutionResult;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.redpill.alfresco.clamav.repo.model.AcavModel;
+import org.redpill.alfresco.clamav.repo.service.StatusService;
 import org.redpill.alfresco.clamav.repo.service.UpdateVirusDatabaseService;
-import org.springframework.util.Assert;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component("acav.updateVirusDatabaseService")
 public class UpdateVirusDatabaseServiceImpl extends AbstractService implements UpdateVirusDatabaseService {
 
   private static final Logger LOG = Logger.getLogger(UpdateVirusDatabaseServiceImpl.class);
 
-  private RuntimeExec _updateVirusDatabaseCommand;
+  @Resource(name = "acav.updateVirusDatabaseCommand")
+  private RuntimeExec _updateCommand;
 
-  private RuntimeExec _updateVirusDatabaseCheckCommand;
+  @Resource(name = "acav.updateVirusDatabaseCheckCommand")
+  private RuntimeExec _checkCommand;
 
-  private String _freshClamConfigFile;
+  private boolean _active;
 
-  private boolean _enabled = true;
-
-  private String _datadir;
+  @Autowired
+  private StatusService _statusService;
 
   /*
    * (non-Javadoc)
@@ -38,15 +44,15 @@ public class UpdateVirusDatabaseServiceImpl extends AbstractService implements U
    */
   @Override
   public void updateDatabase() {
-    if (!_enabled) {
+    if (!isEnabled()) {
       if (LOG.isDebugEnabled()) {
         LOG.debug("Update Virus Database not enabled");
       }
     }
 
-    NodeRef rootNode = _acavNodeService.getRootNode();
+    NodeRef lockNode = _acavNodeService.getUpdateLockNode();
 
-    if (_lockService.getLockStatus(rootNode) != LockStatus.NO_LOCK) {
+    if (_lockService.getLockStatus(lockNode) != LockStatus.NO_LOCK) {
       if (LOG.isDebugEnabled()) {
         LOG.debug("The Alfresco ClamAV system is currently locked...");
       }
@@ -54,9 +60,10 @@ public class UpdateVirusDatabaseServiceImpl extends AbstractService implements U
       return;
     }
 
-    _lockService.lock(rootNode, LockType.NODE_LOCK, 30);
+    _lockService.lock(lockNode, LockType.NODE_LOCK, 30);
 
     try {
+      _statusService.writeInitialUpdateStatus();
 
       Map<String, String> properties = new HashMap<String, String>();
 
@@ -64,15 +71,7 @@ public class UpdateVirusDatabaseServiceImpl extends AbstractService implements U
 
       properties.put(KEY_LOGFILE, logFile.getAbsolutePath());
 
-      String options = "";
-
-      if (StringUtils.isNotBlank(_freshClamConfigFile)) {
-        options += " --config-file=" + _freshClamConfigFile;
-      }
-
-      properties.put(KEY_OPTIONS, options);
-
-      ExecutionResult result = _updateVirusDatabaseCommand.execute(properties);
+      ExecutionResult result = _updateCommand.execute(properties);
 
       String logMessage = getLogMessage(logFile);
 
@@ -86,51 +85,24 @@ public class UpdateVirusDatabaseServiceImpl extends AbstractService implements U
 
       writeLogMessage(logMessage);
     } finally {
-      _lockService.unlock(rootNode);
+      _lockService.unlock(lockNode);
+
+      _statusService.writeFinalUpdateStatus();
     }
   }
 
-  public void setUpdateVirusDatabaseCommand(RuntimeExec updateVirusDatabaseCommand) {
-    _updateVirusDatabaseCommand = updateVirusDatabaseCommand;
+  private boolean isEnabled() {
+    NodeRef systemStatusNode = _acavNodeService.getSystemStatusNode();
+
+    Boolean enabled = (Boolean) _nodeService.getProperty(systemStatusNode, AcavModel.PROP_ENABLED);
+    enabled = enabled != null ? enabled : true;
+
+    return _active && enabled;
   }
 
-  public void setFreshClamConfigFile(String freshClamConfigFile) {
-    _freshClamConfigFile = freshClamConfigFile;
-  }
-
-  public void setEnabled(boolean enabled) {
-    _enabled = enabled;
-  }
-
-  public void setUpdateVirusDatabaseCheckCommand(RuntimeExec updateVirusDatabaseCheckCommand) {
-    _updateVirusDatabaseCheckCommand = updateVirusDatabaseCheckCommand;
-  }
-
-  public void setDatadir(String datadir) {
-    _datadir = datadir;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.redpill.alfresco.clamav.repo.service.impl.AbstractService#afterPropertiesSet()
-   */
-  @Override
-  public void afterPropertiesSet() throws Exception {
-    super.afterPropertiesSet();
-
-    Assert.notNull(_updateVirusDatabaseCommand);
-    Assert.notNull(_updateVirusDatabaseCheckCommand);
-    Assert.hasText(_datadir);
-
-    _enabled = _updateVirusDatabaseCheckCommand.execute().getExitValue() == 0;
-
-    // create the directory
-    File datadir = new File(_datadir);
-
-    if (!datadir.exists()) {
-      FileUtils.forceMkdir(new File(_datadir));
-    }
+  @PostConstruct
+  public void postConstruct() {
+    _active = _checkCommand.execute().getExitValue() == 0;
   }
 
 }

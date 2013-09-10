@@ -1,0 +1,15 @@
+.form-field input[type="text"] {
+   width: 10em;
+}
+
+.online-update-button {
+   vertical-align: bottom;
+}
+
+.cron-save-button {
+   vertical-align: bottom;
+}
+
+.cron-save-button button {
+   vertical-align: bottom; background: url("../images/save-16.png") center center no-repeat transparent;
+}

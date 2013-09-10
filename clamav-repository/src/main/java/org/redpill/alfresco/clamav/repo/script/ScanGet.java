@@ -6,24 +6,31 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.alfresco.util.ParameterCheck;
+import javax.annotation.Resource;
+
+import nl.runnable.alfresco.webscripts.annotations.Authentication;
+import nl.runnable.alfresco.webscripts.annotations.AuthenticationType;
+import nl.runnable.alfresco.webscripts.annotations.HttpMethod;
+import nl.runnable.alfresco.webscripts.annotations.RequestParam;
+import nl.runnable.alfresco.webscripts.annotations.Uri;
+import nl.runnable.alfresco.webscripts.annotations.WebScript;
+
 import org.apache.commons.lang.StringUtils;
 import org.redpill.alfresco.clamav.repo.service.ScanService;
 import org.redpill.alfresco.clamav.repo.utils.ScanSummary;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.extensions.webscripts.Cache;
-import org.springframework.extensions.webscripts.DeclarativeWebScript;
-import org.springframework.extensions.webscripts.Status;
-import org.springframework.extensions.webscripts.WebScriptRequest;
+import org.springframework.extensions.webscripts.WebScriptResponse;
+import org.springframework.stereotype.Component;
 
-public class ScanGet extends DeclarativeWebScript implements InitializingBean {
+@Component
+@WebScript(description = "Scans a directory for viruses", families = { "Alfresco ClamAV" })
+@Authentication(AuthenticationType.ADMIN)
+public class ScanGet {
 
+  @Resource(name = "acav.daemonScanService")
   private ScanService _scanService;
 
-  @Override
-  protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
-    String directory = req.getParameter("directory");
-
+  @Uri(method = HttpMethod.GET, value = "/org/redpill/alfresco/clamav/scan", defaultFormat = "json")
+  public Map<String, Object> scan(@RequestParam String directory, WebScriptResponse response) {
     List<ScanSummary> scanSummaryList = new ArrayList<ScanSummary>();
 
     if (StringUtils.isNotBlank(directory)) {
@@ -45,11 +52,6 @@ public class ScanGet extends DeclarativeWebScript implements InitializingBean {
 
   public void setScanService(ScanService scanService) {
     _scanService = scanService;
-  }
-
-  @Override
-  public void afterPropertiesSet() throws Exception {
-    ParameterCheck.mandatory("scanService", _scanService);
   }
 
 }

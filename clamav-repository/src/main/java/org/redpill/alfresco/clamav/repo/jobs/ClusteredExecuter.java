@@ -1,19 +1,22 @@
 package org.redpill.alfresco.clamav.repo.jobs;
 
+import nl.runnable.alfresco.annotations.RunAsSystem;
+
 import org.alfresco.repo.admin.RepositoryState;
 import org.alfresco.repo.lock.JobLockService;
 import org.alfresco.repo.lock.LockAcquisitionException;
 import org.alfresco.repo.transaction.RetryingTransactionHelper.RetryingTransactionCallback;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.transaction.TransactionService;
-import org.alfresco.util.PropertyCheck;
 import org.alfresco.util.VmShutdownListener;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.redpill.alfresco.clamav.repo.model.AcavModel;
-import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-public abstract class ClusteredExecuter implements InitializingBean {
+@Component
+public abstract class ClusteredExecuter {
 
   private static Logger LOG = Logger.getLogger(ClusteredExecuter.class);
 
@@ -21,31 +24,18 @@ public abstract class ClusteredExecuter implements InitializingBean {
 
   protected ThreadLocal<String> _lockThreadLocal = new ThreadLocal<String>();
 
+  @Autowired
   protected JobLockService _jobLockService;
 
   protected long _lockTTL = DEFAULT_LOCK_TTL;
 
+  @Autowired
   protected TransactionService _transactionService;
 
+  @Autowired
   protected RepositoryState _repositoryState;
 
   protected String _localName;
-
-  public void setJobLockService(JobLockService jobLockService) {
-    _jobLockService = jobLockService;
-  }
-
-  public void setLockTTL(long lockTTL) {
-    _lockTTL = lockTTL;
-  }
-
-  public void setTransactionService(TransactionService transactionService) {
-    _transactionService = transactionService;
-  }
-
-  public void setRepositoryState(RepositoryState repositoryState) {
-    _repositoryState = repositoryState;
-  }
 
   public ClusteredExecuter() {
     _localName = this.getClass().getSimpleName();
@@ -55,6 +45,7 @@ public abstract class ClusteredExecuter implements InitializingBean {
     _localName = localName;
   }
 
+  @RunAsSystem
   public void execute() {
     // Bypass if the system is in read-only mode
     if (_transactionService.isReadOnly()) {
@@ -203,9 +194,20 @@ public abstract class ClusteredExecuter implements InitializingBean {
     return QName.createQName(AcavModel.ACAV_CORE_URI, _localName);
   }
 
-  @Override
-  public void afterPropertiesSet() throws Exception {
-    PropertyCheck.mandatory(this, "jobLockService", _jobLockService);
-    PropertyCheck.mandatory(this, "transactionService", _transactionService);
+  public void setJobLockService(JobLockService jobLockService) {
+    _jobLockService = jobLockService;
   }
+
+  public void setLockTTL(long lockTTL) {
+    _lockTTL = lockTTL;
+  }
+
+  public void setRepositoryState(RepositoryState repositoryState) {
+    _repositoryState = repositoryState;
+  }
+
+  public void setTransactionService(TransactionService transactionService) {
+    _transactionService = transactionService;
+  }
+
 }

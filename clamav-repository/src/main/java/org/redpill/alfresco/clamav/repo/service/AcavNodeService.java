@@ -17,4 +17,12 @@ public interface AcavNodeService {
 
   NodeRef createFolderStructure(NodeRef parentNodeRef);
 
+  NodeRef getUpdateStatusNode();
+
+  NodeRef getSystemStatusNode();
+
+  NodeRef getScanLockNode();
+
+  NodeRef getUpdateLockNode();
+
 }

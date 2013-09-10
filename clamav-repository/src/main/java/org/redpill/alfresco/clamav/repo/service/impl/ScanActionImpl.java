@@ -5,6 +5,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.Resource;
+
 import org.alfresco.error.AlfrescoRuntimeException;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.policy.BehaviourFilter;
@@ -21,18 +23,25 @@ import org.redpill.alfresco.clamav.repo.service.AcavNodeService;
 import org.redpill.alfresco.clamav.repo.service.ScanAction;
 import org.redpill.alfresco.clamav.repo.utils.ScanResult;
 import org.redpill.alfresco.clamav.repo.utils.ScanSummary;
-import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-public class ScanActionImpl implements ScanAction, InitializingBean {
+@Component
+public class ScanActionImpl implements ScanAction {
 
+  @Autowired
   private NodeService _nodeService;
 
+  @Autowired
   private FileFolderService _fileFolderService;
 
+  @Autowired
   private SearchService _searchService;
 
+  @Resource(name = "policyBehaviourFilter")
   private BehaviourFilter _behaviourFilter;
 
+  @Autowired
   private AcavNodeService _acavNodeService;
 
   /*
@@ -214,35 +223,6 @@ public class ScanActionImpl implements ScanAction, InitializingBean {
     }
 
     return name;
-  }
-
-  @Override
-  public void afterPropertiesSet() throws Exception {
-    ParameterCheck.mandatory("nodeService", _nodeService);
-    ParameterCheck.mandatory("searchService", _searchService);
-    ParameterCheck.mandatory("fileFolderService", _fileFolderService);
-    ParameterCheck.mandatory("behaviourFilter", _behaviourFilter);
-    ParameterCheck.mandatory("acavNodeService", _acavNodeService);
-  }
-
-  public void setNodeService(NodeService nodeService) {
-    _nodeService = nodeService;
-  }
-
-  public void setFileFolderService(FileFolderService fileFolderService) {
-    _fileFolderService = fileFolderService;
-  }
-
-  public void setSearchService(SearchService searchService) {
-    _searchService = searchService;
-  }
-
-  public void setBehaviourFilter(BehaviourFilter behaviourFilter) {
-    _behaviourFilter = behaviourFilter;
-  }
-
-  public void setAcavNodeService(AcavNodeService acavNodeService) {
-    _acavNodeService = acavNodeService;
   }
 
 }
