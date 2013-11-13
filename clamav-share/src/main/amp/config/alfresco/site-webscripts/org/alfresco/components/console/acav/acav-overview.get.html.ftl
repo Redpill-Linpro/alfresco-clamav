@@ -3,6 +3,12 @@
 <![endif]-->
 <input id="yui-history-field" type="hidden" />
 
+<#if antivirus?? && antivirus.virus_definitions??>
+<#assign virus_definitions = antivirus.virus_definitions?datetime?string("yyyy-MM-dd HH:mm:ss")>
+<#else>
+<#assign virus_definitions = "">
+</#if>
+
 <#assign el=args.htmlid?html>
 <script type="text/javascript">
    new Redpill.AcavOverview("${el}").setOptions({
@@ -22,7 +28,7 @@
                <div class="set">
                   <div class="set-title">${msg("acav.set.antivirus")}</div>
                   <@renderField "acav.fields.enabled" msg(antivirus.enabled?string) />
-                  <@renderField "acav.fields.virus-definitions" antivirus.virus_definitions?datetime?string("yyyy-MM-dd HH:mm:ss") />
+                  <@renderField "acav.fields.virus-definitions" virus_definitions />
                   <@renderField "acav.fields.last-scan" antivirus.last_scan?datetime?string("yyyy-MM-dd HH:mm:ss") />
                   <@renderField "acav.fields.status" msg(antivirus.status)?html />
                </div>

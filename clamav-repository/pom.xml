@@ -2,8 +2,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <artifactId>clamav-repository</artifactId>
-  <name>Alfresco ClamAV Repository AMP</name>
-  <packaging>jar</packaging>
+  <name>Alfresco ClamAV Repository OSGi Module</name>
+  <packaging>bundle</packaging>
 
   <parent>
     <groupId>org.redpill-linpro.alfresco.clamav</groupId>
@@ -35,12 +35,7 @@
       <groupId>${alfresco.groupId}</groupId>
       <artifactId>alfresco-repository</artifactId>
       <version>${alfresco.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>${alfresco.groupId}</groupId>
-      <artifactId>alfresco-enterprise-repository</artifactId>
-      <version>${alfresco.version}</version>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
@@ -49,6 +44,7 @@
       <version>4.11</version>
       <scope>test</scope>
     </dependency>
+
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-context</artifactId>
@@ -96,19 +92,17 @@
       <version>1.0.1</version>
       <scope>provided</scope>
     </dependency>
-
   </dependencies>
 
   <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>false</filtering>
+      </resource>
+    </resources>
+
     <plugins>
-      <plugin>
-        <artifactId>maven-jar-plugin</artifactId>
-        <configuration>
-          <archive>
-            <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
-          </archive>
-        </configuration>
-      </plugin>
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
@@ -117,8 +111,6 @@
         <configuration>
           <instructions>
             <Alfresco-Dynamic-Extension>true</Alfresco-Dynamic-Extension>
-            <!-- <Alfresco-Spring-Configuration> org.redpill.alfresco.clamav.repo.config, org.redpill.alfresco.clamav.repo.model, org.redpill.alfresco.clamav.repo.utils, org.redpill.alfresco.clamav.repo.script, 
-              org.redpill.alfresco.clamav.repo.service, org.redpill.alfresco.clamav.repo.service.impl </Alfresco-Spring-Configuration> -->
             <Spring-Context>;publish-context:=false</Spring-Context>
             <Embed-Dependency>*;scope=compile</Embed-Dependency>
             <!-- Extra Import-Package directives are necessary for Spring AOP. -->
@@ -127,10 +119,13 @@
               net.sf.cglib.core,
               net.sf.cglib.proxy,
               net.sf.cglib.reflect,
+              org.aopalliance.aop,
+              org.aopalliance.intercept,
+              org.springframework.aop,
+              org.springframework.aop.framework,
               org.springframework.beans,
               org.alfresco.config,
               org.springframework.beans.factory.config,
-              com.philvarner.clamavj,
               acav
             </Import-Package>
             <Bundle-DocURL>https://github.com/oakman/alfresco-clamav</Bundle-DocURL>
@@ -140,18 +135,28 @@
             </Export-Package>
           </instructions>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.redpill-linpro.alfresco</groupId>
+        <artifactId>dynamicextensions-maven-plugin</artifactId>
+        <version>1.0.1</version>
         <executions>
           <execution>
-            <id>bundle-manifest</id>
-            <phase>process-classes</phase>
             <goals>
-              <goal>manifest</goal>
+              <goal>install-bundle</goal>
             </goals>
           </execution>
         </executions>
       </plugin>
     </plugins>
   </build>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>oakman-dynamicextensions-maven-plugin</id>
+      <url>https://raw.github.com/oakman/dynamicextensions-maven-plugin/mvn-repo</url>
+    </pluginRepository>
+  </pluginRepositories>
 
   <repositories>
     <repository>

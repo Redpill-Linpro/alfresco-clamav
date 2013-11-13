@@ -1,0 +1,6 @@
+<webscript>
+  <shortname>Admin Console ACAV Console Scan Jobs</shortname>
+  <description>Administration Console Scan Jobs - Alfresco ClamAV</description>
+  <url>/components/console/acav-scanjobs</url>
+  <family>admin-console</family>
+</webscript>
