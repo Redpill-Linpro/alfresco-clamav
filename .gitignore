@@ -5,3 +5,6 @@
 target
 alf_data_dev
 /clamav-repository/src/main/java/rebel.xml
+.DS_Store
+
+rebel.xml

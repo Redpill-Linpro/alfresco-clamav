@@ -2,9 +2,6 @@ package org.redpill.alfresco.clamav.repo.node;
 
 import javax.annotation.Resource;
 
-import nl.runnable.alfresco.behaviours.annotations.Behaviour;
-import nl.runnable.alfresco.behaviours.annotations.Event;
-
 import org.alfresco.repo.admin.RepositoryState;
 import org.alfresco.repo.lock.JobLockService;
 import org.alfresco.repo.node.NodeServicePolicies.OnCreateNodePolicy;
@@ -20,6 +17,9 @@ import org.redpill.alfresco.clamav.repo.service.ScanService;
 import org.redpill.alfresco.clamav.repo.utils.ScanSummary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.github.dynamicextensionsalfresco.behaviours.annotations.Behaviour;
+import com.github.dynamicextensionsalfresco.behaviours.annotations.Event;
 
 /**
  * @author niklas

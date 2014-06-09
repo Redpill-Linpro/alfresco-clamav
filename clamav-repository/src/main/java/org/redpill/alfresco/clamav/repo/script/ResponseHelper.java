@@ -2,13 +2,14 @@ package org.redpill.alfresco.clamav.repo.script;
 
 import java.io.IOException;
 
-import javax.servlet.http.HttpServletResponse;
-
+import org.json.JSONObject;
+import org.redpill.alfresco.clamav.repo.utils.JsonMessage;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 import org.springframework.extensions.webscripts.WebScriptSession;
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+
+import com.github.dynamicextensionsalfresco.webscripts.resolutions.Resolution;
 
 /**
  * Helper for handling responses.
@@ -24,16 +25,6 @@ class ResponseHelper {
   ResponseHelper(final WebScriptRequest request, final WebScriptResponse response) {
     _request = request;
     _response = response;
-  }
-
-  public ResponseHelper redirectToService(String path) {
-    Assert.hasText(path);
-    if (path.startsWith("/") == false) {
-      path = "/" + path;
-    }
-    _response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY); // 302
-    _response.setHeader("Location", _request.getServiceContextPath() + path);
-    return this;
   }
 
   public void setFlashVariable(final String name, final Object value) {
@@ -63,6 +54,10 @@ class ResponseHelper {
   public ResponseHelper noCache() {
     _response.setHeader("Cache-Control", "no-cache, nostore");
     return this;
+  }
+
+  public Resolution returnEmptyJsonResult() {
+    return new JsonMessage(new JSONObject(), 200);
   }
 
 }

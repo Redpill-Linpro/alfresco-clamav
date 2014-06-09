@@ -1,7 +1,7 @@
 package org.redpill.alfresco.clamav.repo.service;
 
-import nl.runnable.alfresco.annotations.RunAsSystem;
-import nl.runnable.alfresco.annotations.Transactional;
+import com.github.dynamicextensionsalfresco.annotations.RunAsSystem;
+import com.github.dynamicextensionsalfresco.annotations.Transactional;
 
 public interface UpdateVirusDatabaseService {
 

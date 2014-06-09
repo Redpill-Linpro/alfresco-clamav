@@ -6,8 +6,6 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
-import nl.runnable.alfresco.annotations.RunAsSystem;
-
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.util.CronTriggerBean;
@@ -29,6 +27,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.scheduling.quartz.JobDetailBean;
 
+import com.github.dynamicextensionsalfresco.annotations.RunAsSystem;
 import com.philvarner.clamavj.ClamScan;
 
 @Configuration

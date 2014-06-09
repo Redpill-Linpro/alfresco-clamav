@@ -4,13 +4,13 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.List;
 
-import nl.runnable.alfresco.annotations.RunAsSystem;
-
 import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.redpill.alfresco.clamav.repo.utils.ScanResult;
 import org.redpill.alfresco.clamav.repo.utils.ScanSummary;
+
+import com.github.dynamicextensionsalfresco.annotations.RunAsSystem;
 
 public interface ScanService {
 

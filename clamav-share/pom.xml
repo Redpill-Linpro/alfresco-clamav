@@ -8,7 +8,7 @@
   <parent>
     <groupId>org.redpill-linpro.alfresco.clamav</groupId>
     <artifactId>alfresco-clamav</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
   </parent>
 
   <properties>
@@ -75,11 +75,12 @@
                 <include>**/*.js</include>
                 <include>**/*.css</include>
               </includes>
-              <webappDirectory>${project.build.directory}/${project.build.finalName}/web</webappDirectory>
               <force>true</force>
               <statistics>false</statistics>
               <jswarn>false</jswarn>
               <sourceDirectory>${project.basedir}/src/main/resources</sourceDirectory>
+              <outputDirectory>${project.build.directory}/classes</outputDirectory>
+              <encoding>UTF-8</encoding>
             </configuration>
           </execution>
         </executions>
@@ -244,7 +245,7 @@
           <plugin>
             <groupId>org.redpill-linpro.alfresco</groupId>
             <artifactId>refreshwebscripts-maven-plugin</artifactId>
-            <version>1.0.1</version>
+            <version>1.0.2</version>
             <configuration>
               <url>http://localhost:${tomcat.port}/${alfresco.client.war}/page/index</url>
             </configuration>
@@ -261,25 +262,4 @@
     </profile>
   </profiles>
 
-  <pluginRepositories>
-    <pluginRepository>
-      <id>oakman-refreshwebscripts-mvn-repo</id>
-      <url>https://raw.github.com/oakman/refreshwebscripts-maven-plugin/mvn-repo</url>
-    </pluginRepository>
-  </pluginRepositories>
-
-  <repositories>
-    <repository>
-      <id>alfresco-public</id>
-      <url>https://artifacts.alfresco.com/nexus/content/groups/public</url>
-    </repository>
-    <repository>
-      <id>alfresco-public-snapshots</id>
-      <url>https://artifacts.alfresco.com/nexus/content/groups/public-snapshots</url>
-      <snapshots>
-        <enabled>true</enabled>
-        <updatePolicy>daily</updatePolicy>
-      </snapshots>
-    </repository>
-  </repositories>
 </project>

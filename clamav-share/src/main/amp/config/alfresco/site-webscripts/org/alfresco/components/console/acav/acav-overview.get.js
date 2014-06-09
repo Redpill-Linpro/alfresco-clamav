@@ -1,7 +1,10 @@
 function main() {
    var json = remote.call("/org/redpill/alfresco/clamav/overview");
-
+   
    var overview = eval('(' + json + ')');
+   
+   logger.warn(overview);
+   
    var av = overview.antivirus;
    var update = overview.update;
 

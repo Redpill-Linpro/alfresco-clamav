@@ -3,9 +3,6 @@ package org.redpill.alfresco.clamav.repo.service.impl;
 import java.util.Calendar;
 import java.util.Date;
 
-import nl.runnable.alfresco.annotations.RunAsSystem;
-import nl.runnable.alfresco.annotations.Transactional;
-
 import org.alfresco.model.ContentModel;
 import org.alfresco.service.cmr.lock.LockService;
 import org.alfresco.service.cmr.model.FileFolderService;
@@ -26,6 +23,9 @@ import org.redpill.alfresco.clamav.repo.service.AcavNodeService;
 import org.redpill.alfresco.clamav.repo.utils.AcavUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.github.dynamicextensionsalfresco.annotations.RunAsSystem;
+import com.github.dynamicextensionsalfresco.annotations.Transactional;
 
 @Component
 public class AcavNodeServiceImpl implements AcavNodeService {

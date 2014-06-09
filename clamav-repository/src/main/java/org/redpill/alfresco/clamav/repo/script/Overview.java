@@ -6,14 +6,6 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
-import nl.runnable.alfresco.webscripts.annotations.Attribute;
-import nl.runnable.alfresco.webscripts.annotations.Authentication;
-import nl.runnable.alfresco.webscripts.annotations.AuthenticationType;
-import nl.runnable.alfresco.webscripts.annotations.HttpMethod;
-import nl.runnable.alfresco.webscripts.annotations.RequestParam;
-import nl.runnable.alfresco.webscripts.annotations.Uri;
-import nl.runnable.alfresco.webscripts.annotations.WebScript;
-
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.util.CronTriggerBean;
@@ -25,6 +17,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 import org.springframework.stereotype.Component;
+
+import com.github.dynamicextensionsalfresco.webscripts.annotations.Attribute;
+import com.github.dynamicextensionsalfresco.webscripts.annotations.Authentication;
+import com.github.dynamicextensionsalfresco.webscripts.annotations.AuthenticationType;
+import com.github.dynamicextensionsalfresco.webscripts.annotations.HttpMethod;
+import com.github.dynamicextensionsalfresco.webscripts.annotations.RequestParam;
+import com.github.dynamicextensionsalfresco.webscripts.annotations.Uri;
+import com.github.dynamicextensionsalfresco.webscripts.annotations.WebScript;
+import com.github.dynamicextensionsalfresco.webscripts.resolutions.Resolution;
+import com.github.dynamicextensionsalfresco.webscripts.resolutions.TemplateResolution;
 
 @Component
 @WebScript(description = "Gets ovewview information from the repository", families = { "Alfresco ClamAV" })
@@ -41,7 +43,7 @@ public class Overview {
   private CronTriggerBean _updateCronTriggerBean;
 
   @Uri(method = HttpMethod.GET, value = "/org/redpill/alfresco/clamav/overview", defaultFormat = "json")
-  public Map<String, Object> index(WebScriptResponse response) {
+  public Resolution index(WebScriptResponse response) {
     NodeRef systemStatusNode = _acavNodeService.getSystemStatusNode();
     NodeRef updateStatusNode = _acavNodeService.getUpdateStatusNode();
 
@@ -59,7 +61,7 @@ public class Overview {
     model.put("status", status);
     model.put("update_cron_expression", updateCronExpression);
 
-    return model;
+    return new TemplateResolution(model);
   }
 
   @Uri(method = HttpMethod.GET, value = "/org/redpill/alfresco/clamav/overview/empty", defaultFormat = "html")
@@ -68,27 +70,27 @@ public class Overview {
   }
 
   @Uri(method = HttpMethod.POST, value = "/org/redpill/alfresco/clamav/overview/enable")
-  public void enable(@Attribute final ResponseHelper responseHelper) {
+  public Resolution enable(@Attribute final ResponseHelper responseHelper) {
     NodeRef systemStatusNode = _acavNodeService.getSystemStatusNode();
 
     _nodeService.setProperty(systemStatusNode, AcavModel.PROP_ENABLED, true);
 
-    responseHelper.redirectToService("/org/redpill/alfresco/clamav/overview/empty");
+    return responseHelper.returnEmptyJsonResult();
   }
 
   @Uri(method = HttpMethod.POST, value = "/org/redpill/alfresco/clamav/overview/disable")
-  public void disable(@Attribute final ResponseHelper responseHelper) {
+  public Resolution disable(@Attribute final ResponseHelper responseHelper) {
     NodeRef systemStatusNode = _acavNodeService.getSystemStatusNode();
 
     _nodeService.setProperty(systemStatusNode, AcavModel.PROP_ENABLED, false);
 
-    responseHelper.redirectToService("/org/redpill/alfresco/clamav/overview/empty");
+    return responseHelper.returnEmptyJsonResult();
   }
 
   @Uri(method = HttpMethod.POST, value = "/org/redpill/alfresco/clamav/overview/savecron")
-  public void saveCronExpression(@Attribute final ResponseHelper responseHelper, @RequestParam String cronExpression) {
+  public Resolution saveCronExpression(@Attribute final ResponseHelper responseHelper, @RequestParam String cronExpression) {
     if (StringUtils.isBlank(cronExpression)) {
-      responseHelper.redirectToService("/org/redpill/alfresco/clamav/overview/empty");
+      return responseHelper.returnEmptyJsonResult();
     }
 
     NodeRef updateStatusNode = _acavNodeService.getUpdateStatusNode();
@@ -112,11 +114,11 @@ public class Overview {
       throw new RuntimeException(ex);
     }
 
-    responseHelper.redirectToService("/org/redpill/alfresco/clamav/overview/empty");
+    return responseHelper.returnEmptyJsonResult();
   }
 
   @Uri(method = HttpMethod.POST, value = "/org/redpill/alfresco/clamav/overview/update")
-  public void update(@Attribute final ResponseHelper responseHelper) {
+  public Resolution update(@Attribute final ResponseHelper responseHelper) {
     try {
       String jobName = _updateCronTriggerBean.getJobDetail().getName();
       String jobGroup = _updateCronTriggerBean.getJobDetail().getGroup();
@@ -125,7 +127,7 @@ public class Overview {
       throw new RuntimeException(ex);
     }
 
-    responseHelper.redirectToService("/org/redpill/alfresco/clamav/overview/empty");
+    return responseHelper.returnEmptyJsonResult();
   }
 
   @Attribute

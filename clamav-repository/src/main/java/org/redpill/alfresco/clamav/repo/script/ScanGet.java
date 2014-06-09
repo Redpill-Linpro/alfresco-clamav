@@ -8,18 +8,18 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
-import nl.runnable.alfresco.webscripts.annotations.Authentication;
-import nl.runnable.alfresco.webscripts.annotations.AuthenticationType;
-import nl.runnable.alfresco.webscripts.annotations.HttpMethod;
-import nl.runnable.alfresco.webscripts.annotations.RequestParam;
-import nl.runnable.alfresco.webscripts.annotations.Uri;
-import nl.runnable.alfresco.webscripts.annotations.WebScript;
-
 import org.apache.commons.lang.StringUtils;
 import org.redpill.alfresco.clamav.repo.service.ScanService;
 import org.redpill.alfresco.clamav.repo.utils.ScanSummary;
 import org.springframework.extensions.webscripts.WebScriptResponse;
 import org.springframework.stereotype.Component;
+
+import com.github.dynamicextensionsalfresco.webscripts.annotations.Authentication;
+import com.github.dynamicextensionsalfresco.webscripts.annotations.AuthenticationType;
+import com.github.dynamicextensionsalfresco.webscripts.annotations.HttpMethod;
+import com.github.dynamicextensionsalfresco.webscripts.annotations.RequestParam;
+import com.github.dynamicextensionsalfresco.webscripts.annotations.Uri;
+import com.github.dynamicextensionsalfresco.webscripts.annotations.WebScript;
 
 @Component
 @WebScript(description = "Scans a directory for viruses", families = { "Alfresco ClamAV" })

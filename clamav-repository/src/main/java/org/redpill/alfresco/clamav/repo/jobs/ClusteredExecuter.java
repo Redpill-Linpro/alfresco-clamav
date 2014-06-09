@@ -1,7 +1,5 @@
 package org.redpill.alfresco.clamav.repo.jobs;
 
-import nl.runnable.alfresco.annotations.RunAsSystem;
-
 import org.alfresco.repo.admin.RepositoryState;
 import org.alfresco.repo.lock.JobLockService;
 import org.alfresco.repo.lock.LockAcquisitionException;
@@ -14,6 +12,8 @@ import org.apache.log4j.Logger;
 import org.redpill.alfresco.clamav.repo.model.AcavModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.github.dynamicextensionsalfresco.annotations.RunAsSystem;
 
 @Component
 public abstract class ClusteredExecuter {
