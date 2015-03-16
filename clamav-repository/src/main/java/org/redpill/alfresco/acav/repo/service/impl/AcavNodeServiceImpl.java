@@ -6,30 +6,22 @@ import java.util.Date;
 import javax.annotation.Resource;
 
 import org.alfresco.model.ContentModel;
+import org.alfresco.repo.model.Repository;
 import org.alfresco.service.cmr.lock.LockService;
 import org.alfresco.service.cmr.model.FileFolderService;
 import org.alfresco.service.cmr.model.FileInfo;
-import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
-import org.alfresco.service.cmr.repository.StoreRef;
-import org.alfresco.service.cmr.search.ResultSet;
-import org.alfresco.service.cmr.search.SearchParameters;
-import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.PermissionService;
-import org.alfresco.service.namespace.QName;
 import org.alfresco.service.transaction.TransactionService;
 import org.apache.commons.lang.StringUtils;
 import org.redpill.alfresco.acav.repo.model.AcavModel;
 import org.redpill.alfresco.acav.repo.service.AcavNodeService;
-import org.redpill.alfresco.acav.repo.utils.AcavUtilsImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component("acav.acavNodeService")
 public class AcavNodeServiceImpl implements AcavNodeService {
-
-  @Resource(name = "SearchService")
-  private SearchService _searchService;
 
   @Resource(name = "NodeService")
   private NodeService _nodeService;
@@ -46,6 +38,9 @@ public class AcavNodeServiceImpl implements AcavNodeService {
   @Resource(name = "LockService")
   private LockService _lockService;
 
+  @Autowired
+  private Repository _repository;
+
   /*
    * (non-Javadoc)
    * 
@@ -53,32 +48,19 @@ public class AcavNodeServiceImpl implements AcavNodeService {
    */
   @Override
   public NodeRef getRootNode() {
-    String query = "PATH:\"/app:company_home/app:alfresco_clamav\"";
+    NodeRef companyHome = _repository.getCompanyHome();
+    
+    NodeRef root = _fileFolderService.searchSimple(companyHome, "Alfresco ClamAV");
 
-    ResultSet result = search(query);
+    if (root == null) {
+      root = _fileFolderService.create(companyHome, "alfresco_clamav", ContentModel.TYPE_FOLDER).getNodeRef();
 
-    try {
-      if (result.length() > 0) {
-        return result.getNodeRef(0);
-      }
-    } finally {
-      AcavUtilsImpl.closeQuietly(result);
+      _nodeService.setProperty(root, ContentModel.PROP_NAME, "Alfresco ClamAV");
+
+      _lockService.unlock(root);
     }
 
-    NodeRef companyHomeNodeRef = getCompanyHomeNodeRef();
-
-    ChildAssociationRef parent = _nodeService.getPrimaryParent(companyHomeNodeRef);
-
-    String uri = parent.getQName().getNamespaceURI();
-    String validLocalName = QName.createValidLocalName("alfresco_clamav");
-
-    NodeRef acavStorageNode = _nodeService.createNode(companyHomeNodeRef, ContentModel.ASSOC_CONTAINS, QName.createQName(uri, validLocalName), ContentModel.TYPE_FOLDER).getChildRef();
-
-    _nodeService.setProperty(acavStorageNode, ContentModel.PROP_NAME, "Alfresco ClamAV");
-
-    _lockService.unlock(acavStorageNode);
-
-    return acavStorageNode;
+    return root;
   }
 
   @Override
@@ -196,39 +178,6 @@ public class AcavNodeServiceImpl implements AcavNodeService {
     }
 
     return subFolderNodeRef;
-  }
-
-  /**
-   * Executes a Lucene search.
-   * 
-   * @param query
-   *          query to execute
-   * @return A ResultSet, has to be closed.
-   */
-  public ResultSet search(String query) {
-    SearchParameters searchParameters = new SearchParameters();
-    searchParameters.setLanguage(SearchService.LANGUAGE_LUCENE);
-    searchParameters.setQuery(query);
-    searchParameters.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
-
-    return _searchService.query(searchParameters);
-  }
-
-  /**
-   * Fetches the Company Home nodeRef.
-   * 
-   * @return the company home nodeRef
-   */
-  private NodeRef getCompanyHomeNodeRef() {
-    String query = "PATH:\"/app:company_home\"";
-
-    ResultSet result = search(query);
-
-    try {
-      return result.getNodeRef(0);
-    } finally {
-      AcavUtilsImpl.closeQuietly(result);
-    }
   }
 
 }

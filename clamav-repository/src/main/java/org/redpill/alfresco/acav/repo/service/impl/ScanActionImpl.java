@@ -189,7 +189,6 @@ public class ScanActionImpl implements ScanAction {
     try {
       _fileFolderService.copy(nodeRef, virusVaultNodeRef, getUniqueName(virusVaultNodeRef, name));
     } catch (Exception ex) {
-      ex.printStackTrace();
       throw new AlfrescoRuntimeException(ex.getMessage(), ex);
     } finally {
       _behaviourFilter.enableBehaviour();
