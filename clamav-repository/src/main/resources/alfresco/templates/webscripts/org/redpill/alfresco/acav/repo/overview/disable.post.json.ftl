@@ -1,0 +1,5 @@
+<#compress>
+{
+  "result": "ok"
+}
+</#compress>

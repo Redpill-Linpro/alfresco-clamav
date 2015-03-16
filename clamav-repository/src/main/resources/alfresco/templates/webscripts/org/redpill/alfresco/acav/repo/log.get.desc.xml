@@ -1,0 +1,7 @@
+<webscript>
+   <shortname>Fetches scan logs</shortname>
+   <url>/org/redpill/alfresco/clamav/log</url>
+   <authentication>admin</authentication>
+   <format default="json">extension</format>
+   <family>Alfresco ClamAV</family>
+</webscript>

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+  <bean id="AlfrescoClamAV" class="org.alfresco.repo.management.subsystems.ChildApplicationContextFactory" parent="abstractPropertyBackedBean">
+    <property name="saveSetProperty" value="true" />
+    <property name="autoStart" value="true" />
+  </bean>
+
+  <bean id="acav.systemScanDirectoryRegistry" class="org.alfresco.repo.management.subsystems.SubsystemProxyFactory">
+    <property name="sourceApplicationContextFactory">
+      <ref bean="AlfrescoClamAV" />
+    </property>
+    <property name="sourceBeanName">
+      <value>acav.systemScanDirectoryRegistry</value>
+    </property>
+    <property name="interfaces">
+      <list>
+        <value>org.redpill.alfresco.acav.repo.service.SystemScanDirectoryRegistry</value>
+      </list>
+    </property>
+  </bean>
+
+  <bean id="acav.scanAction" class="org.alfresco.repo.management.subsystems.SubsystemProxyFactory">
+    <property name="sourceApplicationContextFactory">
+      <ref bean="AlfrescoClamAV" />
+    </property>
+    <property name="sourceBeanName">
+      <value>acav.scanAction</value>
+    </property>
+    <property name="interfaces">
+      <list>
+        <value>org.redpill.alfresco.acav.repo.service.ScanAction</value>
+      </list>
+    </property>
+  </bean>
+
+  <bean id="acav.acavNodeService" class="org.alfresco.repo.management.subsystems.SubsystemProxyFactory">
+    <property name="sourceApplicationContextFactory">
+      <ref bean="AlfrescoClamAV" />
+    </property>
+    <property name="sourceBeanName">
+      <value>acav.acavNodeService</value>
+    </property>
+    <property name="interfaces">
+      <list>
+        <value>org.redpill.alfresco.acav.repo.service.AcavNodeService</value>
+      </list>
+    </property>
+  </bean>
+
+  <bean id="acav.acavUtils" class="org.alfresco.repo.management.subsystems.SubsystemProxyFactory">
+    <property name="sourceApplicationContextFactory">
+      <ref bean="AlfrescoClamAV" />
+    </property>
+    <property name="sourceBeanName">
+      <value>acav.acavUtils</value>
+    </property>
+    <property name="interfaces">
+      <list>
+        <value>org.redpill.alfresco.acav.repo.utils.AcavUtils</value>
+      </list>
+    </property>
+  </bean>
+
+  <!-- Webscripts must be declared in the context that's in the Alfresco classloader. -->
+  <!-- It will not work if it resides in the subsystem, as that somehow doesn't get -->
+  <!-- picked up by Alfresco... -->
+
+  <bean id="webscript.org.redpill.alfresco.acav.repo.directory.get" class="org.redpill.alfresco.acav.repo.script.DirectoryGet" parent="webscript">
+    <property name="systemScanDirectoryRegistry" ref="acav.systemScanDirectoryRegistry" />
+  </bean>
+
+  <bean id="webscript.org.redpill.alfresco.acav.repo.handle.get" class="org.redpill.alfresco.acav.repo.script.HandleGet" parent="webscript">
+    <property name="scanAction" ref="acav.scanAction" />
+  </bean>
+
+  <bean id="webscript.org.redpill.alfresco.acav.repo.overview.disable.post" class="org.redpill.alfresco.acav.repo.script.overview.DisablePost">
+    <property name="acavNodeService" ref="acav.acavNodeService" />
+    <property name="nodeService" ref="NodeService" />
+  </bean>
+
+  <bean id="webscript.org.redpill.alfresco.acav.repo.overview.enable.post" class="org.redpill.alfresco.acav.repo.script.overview.EnablePost">
+    <property name="acavNodeService" ref="acav.acavNodeService" />
+    <property name="nodeService" ref="NodeService" />
+  </bean>
+
+  <bean id="webscript.org.redpill.alfresco.acav.repo.overview.index.get" class="org.redpill.alfresco.acav.repo.script.overview.IndexGet">
+    <property name="acavNodeService" ref="acav.acavNodeService" />
+    <property name="nodeService" ref="NodeService" />
+  </bean>
+
+  <bean id="webscript.org.redpill.alfresco.acav.repo.overview.empty.get" class="org.redpill.alfresco.acav.repo.script.overview.EmptyGet" />
+
+  <bean id="webscript.org.redpill.alfresco.acav.repo.overview.savecron.post" class="org.redpill.alfresco.acav.repo.script.overview.SaveCronPost">
+    <property name="acavUtils" ref="acav.acavUtils" />
+  </bean>
+
+  <bean id="webscript.org.redpill.alfresco.acav.repo.overview.update.post" class="org.redpill.alfresco.acav.repo.script.overview.UpdatePost">
+    <property name="acavUtils" ref="acav.acavUtils" />
+  </bean>
+
+</beans>

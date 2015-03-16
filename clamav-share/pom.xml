@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>clamav-share</artifactId>
+  <name>Alfresco ClamAV Share Module</name>
+
+  <parent>
+    <groupId>org.redpill-linpro.alfresco.clamav</groupId>
+    <artifactId>alfresco-clamav</artifactId>
+    <version>1.1.0</version>
+  </parent>
+
+  <properties>
+    <!-- Defines the target WAR for this AMP. Allowed values: alfresco | share -->
+    <!-- Defaults to a repository AMP -->
+    <alfresco.client.war>share</alfresco.client.war>
+    <tomcat.home>${tomcat.share.home}</tomcat.home>
+    <tomcat.port>${tomcat.share.port}</tomcat.port>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>${alfresco.groupId}</groupId>
+      <artifactId>alfresco-repository</artifactId>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>net.alchim31.maven</groupId>
+        <artifactId>yuicompressor-maven-plugin</artifactId>
+        <version>1.5.1</version>
+        <executions>
+          <execution>
+            <id>minimize-javascript</id>
+            <goals>
+              <goal>compress</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <sourceDirectory>${project.basedir}/src/main/resources/META-INF</sourceDirectory>
+          <outputDirectory>${project.build.directory}/classes/META-INF</outputDirectory>
+          <force>true</force>
+          <statistics>false</statistics>
+          <jswarn>false</jswarn>
+          <encoding>UTF-8</encoding>
+          <preProcessAggregates>true</preProcessAggregates>
+          <excludeResources>true</excludeResources>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

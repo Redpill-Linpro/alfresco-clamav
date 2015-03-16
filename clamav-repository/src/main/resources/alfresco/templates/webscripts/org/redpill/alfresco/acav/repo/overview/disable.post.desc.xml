@@ -1,0 +1,7 @@
+<webscript>
+   <shortname>Disables the Alfresco ClamAV system</shortname>
+   <url>/org/redpill/alfresco/acav/overview/disable</url>
+   <authentication>admin</authentication>
+   <format default="json">extension</format>
+   <family>Alfresco ClamAV</family>
+</webscript>
