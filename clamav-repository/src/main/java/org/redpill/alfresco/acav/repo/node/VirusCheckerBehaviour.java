@@ -12,7 +12,6 @@ import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.policy.JavaBehaviour;
 import org.alfresco.repo.policy.PolicyComponent;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.repo.version.VersionServicePolicies.AfterCreateVersionPolicy;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -126,17 +125,18 @@ public class VirusCheckerBehaviour implements OnCreateNodePolicy, AfterCreateVer
     executer.setTransactionService(_transactionService);
 
     _behaviourFilter.disableBehaviour();
-
-    AuthenticationUtil.runAsSystem(new RunAsWork<Void>() {
-
-      @Override
-      public Void doWork() throws Exception {
-        executer.execute();
-
-        return null;
-      }
-
-    });
+    
+    String username = AuthenticationUtil.getFullyAuthenticatedUser();
+    
+    try {
+      AuthenticationUtil.setFullyAuthenticatedUser(AuthenticationUtil.SYSTEM_USER_NAME);
+      
+      executer.execute();
+    } finally {
+      AuthenticationUtil.setFullyAuthenticatedUser(username);
+      
+      _behaviourFilter.enableBehaviour();
+    }
   }
 
   @PostConstruct

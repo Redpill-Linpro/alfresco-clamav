@@ -106,6 +106,9 @@ public abstract class ClusteredExecuter {
    * @return Returns the lock token
    */
   protected void refreshLock() {
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("Refreshing lock");
+    }
     String lockToken = _lockThreadLocal.get();
 
     if (StringUtils.isBlank(lockToken)) {
@@ -116,6 +119,9 @@ public abstract class ClusteredExecuter {
   }
 
   protected void releaseLock() {
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("Releasing lock");
+    }
     String lockToken = _lockThreadLocal.get();
 
     if (StringUtils.isBlank(lockToken)) {
@@ -192,6 +198,10 @@ public abstract class ClusteredExecuter {
   protected abstract void executeInternal();
 
   protected QName getLockQName() {
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("Lock QName is: " + _localName);
+    }
+
     return QName.createQName(AcavModel.ACAV_CORE_URI, _localName);
   }
 
