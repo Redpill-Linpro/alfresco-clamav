@@ -1,0 +1,7 @@
+<webscript>
+   <shortname>Return an empty result</shortname>
+   <url>/org/redpill/alfresco/acav/overview/empty</url>
+   <authentication>admin</authentication>
+   <format default="json">extension</format>
+   <family>Alfresco ClamAV</family>
+</webscript>

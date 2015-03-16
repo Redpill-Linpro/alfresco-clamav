@@ -1,0 +1,7 @@
+<webscript>
+   <shortname>Enables the Alfresco ClamAV system</shortname>
+   <url>/org/redpill/alfresco/acav/overview/enable</url>
+   <authentication>admin</authentication>
+   <format default="json">extension</format>
+   <family>Alfresco ClamAV</family>
+</webscript>

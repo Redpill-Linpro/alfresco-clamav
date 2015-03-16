@@ -1,0 +1,67 @@
+<extension>
+
+  <modules>
+    <module>
+      <id>Alfresco ClamAV Global</id>
+      <auto-deploy>true</auto-deploy>
+
+      <!-- Base evaluator that decides if any of the component bindings should be used at all -->
+      <evaluator type="site.module.evaluator">
+        <params>
+          <sites>.*</sites>
+          <sitePresets>site-dashboard</sitePresets>
+          <applyForNonSites>true</applyForNonSites>
+        </params>
+      </evaluator>
+
+      <!-- Apply the following customizations when the base evaluator above passes -->
+      <customizations>
+        <customization>
+          <targetPackageRoot>org.alfresco</targetPackageRoot>
+          <sourcePackageRoot>org.redpill.alfresco.acav.customizations</sourcePackageRoot>
+        </customization>
+      </customizations>
+
+      <configurations>
+        <config evaluator="string-compare" condition="DocumentLibrary">
+          <indicators>
+            <indicator id="acav-infected" index="1">
+              <evaluator>evaluator.doclib.indicator.acav-infected</evaluator>
+            </indicator>
+          </indicators>
+
+          <metadata-templates>
+            <!-- Default (fallback) -->
+            <template id="default">
+              <banner index="1" id="infectedBanner" evaluator="evaluator.doclib.indicator.acav-infected">{infectedBanner}</banner>
+            </template>
+          </metadata-templates>
+        </config>
+
+        <config evaluator="string-compare" condition="Alfresco:Name=AcavInformation">
+          <forms>
+            <form>
+              <field-visibility>
+                <show id="AcavEnabled" />
+                <show id="VirusDefinitions" />
+                <show id="LastScan" />
+                <show id="Status" />
+              </field-visibility>
+              <appearance>
+                <set id="antivirus" appearance="title" label-id="acav.set.antivirus" />
+
+                <field id="AcavEnabled" label-id="acav.fields.enabled" set="antivirus">
+                  <control template="/org/alfresco/components/form/controls/checkbox.ftl" />
+                </field>
+                <field id="VirusDefinitions" label-id="acav.fields.virus-definitions" set="antivirus" />
+                <field id="LastScan" label-id="acav.fields.last-scan" set="antivirus" />
+                <field id="Status" label-id="acav.fields.status" set="antivirus" />
+              </appearance>
+            </form>
+          </forms>
+        </config>
+      </configurations>
+    </module>
+  </modules>
+
+</extension>

@@ -1,0 +1,7 @@
+<webscript>
+   <shortname>Saves the cron expression</shortname>
+   <url>/org/redpill/alfresco/acav/overview/savecron?cronExpression={cronExpression}</url>
+   <authentication>admin</authentication>
+   <format default="json">extension</format>
+   <family>Alfresco ClamAV</family>
+</webscript>

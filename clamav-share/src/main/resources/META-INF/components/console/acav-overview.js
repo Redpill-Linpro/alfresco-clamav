@@ -97,7 +97,7 @@ if (typeof Redpill == "undefined" || !Redpill) {
 
       onEnableClick : function() {
          Alfresco.util.Ajax.jsonPost({
-            url : Alfresco.constants.PROXY_URI + "org/redpill/alfresco/clamav/overview/enable",
+            url : Alfresco.constants.PROXY_URI + "org/redpill/alfresco/acav/overview/enable",
             dataObj : {
                "noCache" : new Date().getTime()
             },
@@ -115,7 +115,7 @@ if (typeof Redpill == "undefined" || !Redpill) {
 
       onDisableClick : function() {
          Alfresco.util.Ajax.jsonPost({
-            url : Alfresco.constants.PROXY_URI + "org/redpill/alfresco/clamav/overview/disable",
+            url : Alfresco.constants.PROXY_URI + "org/redpill/alfresco/acav/overview/disable",
             dataObj : {
                "noCache" : new Date().getTime()
             },
@@ -135,7 +135,7 @@ if (typeof Redpill == "undefined" || !Redpill) {
          var cronExpression = Dom.get(this.id + "-acav.fields.cron-update").value;
 
          Alfresco.util.Ajax.request({
-            url : Alfresco.constants.PROXY_URI + "org/redpill/alfresco/clamav/overview/savecron",
+            url : Alfresco.constants.PROXY_URI + "org/redpill/alfresco/acav/overview/savecron",
             method : Alfresco.util.Ajax.POST,
             dataObj : {
                "cronExpression" : cronExpression,
@@ -156,7 +156,7 @@ if (typeof Redpill == "undefined" || !Redpill) {
 
       onOnlineUpdateClick : function() {
          Alfresco.util.Ajax.jsonPost({
-            url : Alfresco.constants.PROXY_URI + "org/redpill/alfresco/clamav/overview/update",
+            url : Alfresco.constants.PROXY_URI + "org/redpill/alfresco/acav/overview/update",
             dataObj : {
                "noCache" : new Date().getTime()
             },
@@ -179,7 +179,7 @@ if (typeof Redpill == "undefined" || !Redpill) {
 
       checkIfUpdateReady : function(timer) {
          Alfresco.util.Ajax.jsonGet({
-            url : Alfresco.constants.PROXY_URI + "org/redpill/alfresco/clamav/overview",
+            url : Alfresco.constants.PROXY_URI + "org/redpill/alfresco/acav/overview",
             dataObj : {
                "noCache" : new Date().getTime()
             },

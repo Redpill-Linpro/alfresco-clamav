@@ -1,0 +1,7 @@
+<webscript>
+   <shortname>Handles the specific file with the virus name, name and nodeRef</shortname>
+   <url>/org/redpill/alfresco/acav/handle?nodeRef={nodeRef}&amp;name={name}&amp;virusName={virusName}</url>
+   <authentication>admin</authentication>
+   <format default="json">extension</format>
+   <family>Alfresco ClamAV</family>
+</webscript>
