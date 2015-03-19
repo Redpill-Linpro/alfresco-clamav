@@ -25,7 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 public abstract class AbstractScanService extends AbstractService implements ScanService {
-  
+
   private static final Logger LOG = Logger.getLogger(AbstractScanService.class);
 
   @Resource(name = "ContentService")
@@ -156,12 +156,20 @@ public abstract class AbstractScanService extends AbstractService implements Sca
   }
 
   public boolean isEnabled() {
+    if (!_enabled) {
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("Alfresco ClamAV is disabled in the configuration file");
+      }
+      
+      return false;
+    }
+
     NodeRef systemStatusNode = _acavNodeService.getSystemStatusNode();
 
     Boolean enabled = (Boolean) _nodeService.getProperty(systemStatusNode, AcavModel.PROP_ENABLED);
     enabled = enabled != null ? enabled : false;
 
-    boolean result = isActive() && enabled && _enabled;
+    boolean result = isActive() && enabled;
 
     if (LOG.isDebugEnabled()) {
       LOG.debug("Alfresco ClamAV is " + (result ? "enabled" : "disabled"));
