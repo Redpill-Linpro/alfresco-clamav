@@ -39,6 +39,8 @@ public class DaemonScanServiceImpl extends AbstractScanService {
 
   @Autowired
   private ClamScan _clamScan;
+  
+  private Boolean _active;
 
   /*
    * (non-Javadoc)
@@ -149,7 +151,21 @@ public class DaemonScanServiceImpl extends AbstractScanService {
 
   @Override
   public boolean isActive() {
-    return _clamScan.ping();
+    if (_active == null) {
+      try {
+        _active = _clamScan.ping();
+      } catch (Exception ex) {
+        LOG.error("Can't ping the clamd service, put on TRACE on this class to see the stack trace.");
+
+        if (LOG.isTraceEnabled()) {
+          LOG.trace(ex.getMessage(), ex);
+        }
+
+        _active = false;
+      }
+    }
+    
+    return _active;
   }
 
 }
