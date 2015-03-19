@@ -15,14 +15,18 @@ import org.alfresco.service.cmr.repository.ContentService;
 import org.alfresco.service.cmr.repository.FileContentReader;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.util.ParameterCheck;
+import org.apache.log4j.Logger;
 import org.redpill.alfresco.acav.repo.model.AcavModel;
 import org.redpill.alfresco.acav.repo.service.ScanService;
 import org.redpill.alfresco.acav.repo.service.StatusService;
 import org.redpill.alfresco.acav.repo.utils.AcavUtilsImpl;
 import org.redpill.alfresco.acav.repo.utils.ScanSummary;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 public abstract class AbstractScanService extends AbstractService implements ScanService {
+  
+  private static final Logger LOG = Logger.getLogger(AbstractScanService.class);
 
   @Resource(name = "ContentService")
   protected ContentService _contentService;
@@ -32,6 +36,9 @@ public abstract class AbstractScanService extends AbstractService implements Sca
 
   @Autowired
   protected StatusService _statusService;
+
+  @Value("${acav.enabled}")
+  protected Boolean _enabled;
 
   /*
    * (non-Javadoc)
@@ -152,9 +159,15 @@ public abstract class AbstractScanService extends AbstractService implements Sca
     NodeRef systemStatusNode = _acavNodeService.getSystemStatusNode();
 
     Boolean enabled = (Boolean) _nodeService.getProperty(systemStatusNode, AcavModel.PROP_ENABLED);
-    enabled = enabled != null ? enabled : true;
+    enabled = enabled != null ? enabled : false;
 
-    return isActive() && enabled;
+    boolean result = isActive() && enabled && _enabled;
+
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("Alfresco ClamAV is " + (result ? "enabled" : "disabled"));
+    }
+
+    return result;
   }
 
   public abstract boolean isActive();
