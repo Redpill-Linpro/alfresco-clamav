@@ -15,6 +15,7 @@
     <module.id>acav-repo</module.id>
     <alfresco.client.war>alfresco</alfresco.client.war>
     <tomcat.home>${tomcat.repo.home}</tomcat.home>
+    <ft.skip>false</ft.skip>
   </properties>
 
   <dependencies>
@@ -61,7 +62,7 @@
     <dependency>
       <groupId>org.redpill-linpro.alfresco</groupId>
       <artifactId>alfresco-test-repo</artifactId>
-      <version>1.0.5</version>
+      <version>1.0.10</version>
       <scope>test</scope>
     </dependency>
 
@@ -69,14 +70,13 @@
       <groupId>org.codehaus.groovy</groupId>
       <artifactId>groovy-all</artifactId>
       <!-- Needs to be the same version that REST Assured depends on -->
-      <version>2.3.2</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
-      <version>4.2.6</version>
+      <version>4.3.6</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

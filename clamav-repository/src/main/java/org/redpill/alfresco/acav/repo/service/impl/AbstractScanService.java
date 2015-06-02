@@ -3,8 +3,6 @@ package org.redpill.alfresco.acav.repo.service.impl;
 import java.io.File;
 import java.io.InputStream;
 
-import javax.annotation.Resource;
-
 import org.alfresco.model.ContentModel;
 import org.alfresco.service.cmr.lock.LockStatus;
 import org.alfresco.service.cmr.lock.LockType;
@@ -22,16 +20,19 @@ import org.redpill.alfresco.acav.repo.service.StatusService;
 import org.redpill.alfresco.acav.repo.utils.AcavUtilsImpl;
 import org.redpill.alfresco.acav.repo.utils.ScanSummary;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 
 public abstract class AbstractScanService extends AbstractService implements ScanService {
 
   private static final Logger LOG = Logger.getLogger(AbstractScanService.class);
 
-  @Resource(name = "ContentService")
+  @Autowired
+  @Qualifier("ContentService")
   protected ContentService _contentService;
 
-  @Resource(name = "FileFolderService")
+  @Autowired
+  @Qualifier("FileFolderService")
   protected FileFolderService _fileFolderService;
 
   @Autowired
@@ -160,7 +161,7 @@ public abstract class AbstractScanService extends AbstractService implements Sca
       if (LOG.isDebugEnabled()) {
         LOG.debug("Alfresco ClamAV is disabled in the configuration file");
       }
-      
+
       return false;
     }
 

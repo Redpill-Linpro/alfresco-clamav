@@ -2,8 +2,6 @@ package org.redpill.alfresco.acav.repo.service.impl;
 
 import java.util.Date;
 
-import javax.annotation.Resource;
-
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.model.FileFolderService;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -14,6 +12,7 @@ import org.redpill.alfresco.acav.repo.service.AcavNodeService;
 import org.redpill.alfresco.acav.repo.service.ScanHistoryService;
 import org.redpill.alfresco.acav.repo.utils.ScanSummary;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -22,10 +21,12 @@ public class ScanHistoryServiceImpl implements ScanHistoryService {
   @Autowired
   private AcavNodeService _acavNodeService;
 
-  @Resource(name = "NodeService")
+  @Autowired
+  @Qualifier("NodeService")
   private NodeService _nodeService;
 
-  @Resource(name = "FileFolderService")
+  @Autowired
+  @Qualifier("FileFolderService")
   private FileFolderService _fileFolderService;
 
   @Override

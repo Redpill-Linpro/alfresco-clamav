@@ -1,7 +1,5 @@
 package org.redpill.alfresco.acav.repo.jobs;
 
-import javax.annotation.Resource;
-
 import org.alfresco.repo.admin.RepositoryState;
 import org.alfresco.repo.lock.JobLockService;
 import org.alfresco.repo.lock.LockAcquisitionException;
@@ -13,6 +11,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.redpill.alfresco.acav.repo.model.AcavModel;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -29,7 +28,8 @@ public abstract class ClusteredExecuter {
 
   protected long _lockTTL = DEFAULT_LOCK_TTL;
 
-  @Resource(name = "TransactionService")
+  @Autowired
+  @Qualifier("TransactionService")
   protected TransactionService _transactionService;
 
   @Autowired

@@ -5,8 +5,6 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import javax.annotation.Resource;
-
 import org.alfresco.error.AlfrescoRuntimeException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
@@ -19,6 +17,7 @@ import org.quartz.CronTrigger;
 import org.redpill.alfresco.acav.repo.model.AcavModel;
 import org.redpill.alfresco.acav.repo.service.AcavNodeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component("acav.acavUtils")
@@ -30,7 +29,8 @@ public class AcavUtilsImpl implements AcavUtils {
   @Autowired
   private AcavNodeService _acavNodeService;
 
-  @Resource(name = "acav.updateVirusDatabaseServiceTrigger")
+  @Autowired
+  @Qualifier("acav.updateVirusDatabaseServiceTrigger")
   private CronTriggerBean _updateCronTriggerBean;
 
   public static void closeQuietly(ResultSet resultSet) {

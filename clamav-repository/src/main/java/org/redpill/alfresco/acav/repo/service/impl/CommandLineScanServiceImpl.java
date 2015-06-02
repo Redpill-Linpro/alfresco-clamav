@@ -8,8 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Resource;
-
 import org.alfresco.error.AlfrescoRuntimeException;
 import org.alfresco.model.ContentModel;
 import org.alfresco.service.cmr.lock.LockStatus;
@@ -37,6 +35,7 @@ import org.redpill.alfresco.acav.repo.utils.ScanResult;
 import org.redpill.alfresco.acav.repo.utils.ScanSummary;
 import org.redpill.alfresco.acav.repo.utils.ScanSummary.ScanType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component("acav.commandLineScanService")
@@ -44,10 +43,12 @@ public class CommandLineScanServiceImpl extends AbstractScanService {
 
   private static final Logger LOG = Logger.getLogger(CommandLineScanServiceImpl.class);
 
-  @Resource(name = "acav.scanCommand")
+  @Autowired
+  @Qualifier("acav.scanCommand")
   private RuntimeExec _scanCommand;
 
-  @Resource(name = "acav.scanCheckCommand")
+  @Autowired
+  @Qualifier("acav.scanCheckCommand")
   private RuntimeExec _checkCommand;
 
   @Autowired
@@ -59,10 +60,12 @@ public class CommandLineScanServiceImpl extends AbstractScanService {
   @Autowired
   private NodeDao _nodeDao;
 
-  @Resource(name = "SearchService")
+  @Autowired
+  @Qualifier("SearchService")
   private SearchService _searchService;
 
-  @Resource(name = "SiteService")
+  @Autowired
+  @Qualifier("SiteService")
   private SiteService _siteService;
 
   private Boolean _active;

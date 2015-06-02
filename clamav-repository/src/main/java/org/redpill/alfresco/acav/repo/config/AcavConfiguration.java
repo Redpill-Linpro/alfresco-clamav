@@ -4,8 +4,6 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.annotation.Resource;
-
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -23,6 +21,7 @@ import org.redpill.alfresco.acav.repo.service.SystemScanDirectoryRegistry;
 import org.redpill.alfresco.acav.repo.service.UpdateVirusDatabaseService;
 import org.redpill.alfresco.acav.repo.utils.SystemScanDirectoryRegister;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -51,7 +50,8 @@ public class AcavConfiguration {
   @Autowired
   private UpdateVirusDatabaseService _updateVirusDatabaseService;
 
-  @Resource(name = "schedulerFactory")
+  @Autowired
+  @Qualifier("schedulerFactory")
   private Scheduler _scheduler;
 
   @Autowired
@@ -60,7 +60,8 @@ public class AcavConfiguration {
   @Autowired
   private AcavNodeService _acavNodeService;
 
-  @Resource(name = "NodeService")
+  @Autowired
+  @Qualifier("NodeService")
   private NodeService _nodeService;
 
   @Bean(name = "acav.systemScanDirectoryContentStore")
