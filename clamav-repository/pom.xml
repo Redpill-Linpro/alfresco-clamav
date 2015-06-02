@@ -20,6 +20,11 @@
 
   <dependencies>
     <dependency>
+      <groupId>${alfresco.groupId}</groupId>
+      <artifactId>alfresco-repository</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
