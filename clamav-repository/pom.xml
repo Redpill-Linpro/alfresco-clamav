@@ -20,13 +20,6 @@
 
   <dependencies>
     <dependency>
-      <groupId>${alfresco.groupId}</groupId>
-      <artifactId>alfresco-repository</artifactId>
-      <version>${alfresco.version}</version>
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
@@ -63,13 +56,6 @@
       <groupId>org.redpill-linpro.alfresco</groupId>
       <artifactId>alfresco-test-repo</artifactId>
       <version>1.0.10</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.codehaus.groovy</groupId>
-      <artifactId>groovy-all</artifactId>
-      <!-- Needs to be the same version that REST Assured depends on -->
       <scope>test</scope>
     </dependency>
 
