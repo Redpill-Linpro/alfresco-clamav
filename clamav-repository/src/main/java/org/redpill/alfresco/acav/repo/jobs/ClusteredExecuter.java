@@ -102,8 +102,6 @@ public abstract class ClusteredExecuter {
   /**
    * Attempts to get the lock. If it fails, the current transaction is marked
    * for rollback.
-   * 
-   * @return Returns the lock token
    */
   protected void refreshLock() {
     if (LOG.isDebugEnabled()) {
@@ -137,7 +135,7 @@ public abstract class ClusteredExecuter {
    * Method for checking whether a lock exists or not. There are currently no
    * good ways of doing this, so a try...catch procedure is used.
    * 
-   * @return
+   * @return true if a lock exists, false otherwise
    */
   protected boolean hasLock() {
     boolean hasLock = false;
