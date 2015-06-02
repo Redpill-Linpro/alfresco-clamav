@@ -2,20 +2,19 @@ package org.redpill.alfresco.acav.repo.jobs;
 
 import java.util.List;
 
-import javax.annotation.Resource;
-
 import org.redpill.alfresco.acav.repo.service.ScanAction;
 import org.redpill.alfresco.acav.repo.service.ScanService;
 import org.redpill.alfresco.acav.repo.utils.ScanResult;
 import org.redpill.alfresco.acav.repo.utils.ScanSummary;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component("acav.scanSystemService")
 public class ScanSystemService extends ClusteredExecuter {
 
-  @Resource(name = "acav.daemonScanService")
+  @Autowired
+  @Qualifier("acav.daemonScanService")
   private ScanService _scanService;
 
   @Autowired

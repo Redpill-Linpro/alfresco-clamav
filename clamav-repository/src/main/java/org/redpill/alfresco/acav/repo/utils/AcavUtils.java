@@ -4,6 +4,8 @@ public interface AcavUtils {
 
   /**
    * Updates the cron expression for the update virus database job
+   * 
+   * @param cronExpression the cron expression to update
    */
   void updateCronExpression(String cronExpression);
   

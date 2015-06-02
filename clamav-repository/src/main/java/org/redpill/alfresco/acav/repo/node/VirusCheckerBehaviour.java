@@ -1,7 +1,6 @@
 package org.redpill.alfresco.acav.repo.node;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.admin.RepositoryState;
@@ -22,6 +21,7 @@ import org.redpill.alfresco.acav.repo.service.ScanAction;
 import org.redpill.alfresco.acav.repo.service.ScanService;
 import org.redpill.alfresco.acav.repo.utils.ScanSummary;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
@@ -35,7 +35,8 @@ public class VirusCheckerBehaviour implements OnCreateNodePolicy, AfterCreateVer
   @Autowired
   private ScanAction _scanAction;
 
-  @Resource(name = "acav.daemonScanService")
+  @Autowired
+  @Qualifier("acav.daemonScanService")
   private ScanService _scanService;
 
   @Autowired
@@ -46,10 +47,12 @@ public class VirusCheckerBehaviour implements OnCreateNodePolicy, AfterCreateVer
   @Autowired
   private RepositoryState _repositoryState;
 
-  @Resource(name = "TransactionService")
+  @Autowired
+  @Qualifier("TransactionService")
   private TransactionService _transactionService;
 
-  @Resource(name = "policyBehaviourFilter")
+  @Autowired
+  @Qualifier("policyBehaviourFilter")
   private BehaviourFilter _behaviourFilter;
 
   @Autowired
@@ -125,16 +128,16 @@ public class VirusCheckerBehaviour implements OnCreateNodePolicy, AfterCreateVer
     executer.setTransactionService(_transactionService);
 
     _behaviourFilter.disableBehaviour();
-    
+
     String username = AuthenticationUtil.getFullyAuthenticatedUser();
-    
+
     try {
       AuthenticationUtil.setFullyAuthenticatedUser(AuthenticationUtil.SYSTEM_USER_NAME);
-      
+
       executer.execute();
     } finally {
       AuthenticationUtil.setFullyAuthenticatedUser(username);
-      
+
       _behaviourFilter.enableBehaviour();
     }
   }

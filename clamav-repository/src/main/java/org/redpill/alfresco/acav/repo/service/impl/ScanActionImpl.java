@@ -5,8 +5,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.annotation.Resource;
-
 import org.alfresco.error.AlfrescoRuntimeException;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.policy.BehaviourFilter;
@@ -24,21 +22,26 @@ import org.redpill.alfresco.acav.repo.service.ScanAction;
 import org.redpill.alfresco.acav.repo.utils.ScanResult;
 import org.redpill.alfresco.acav.repo.utils.ScanSummary;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component(value = "acav.scanAction")
 public class ScanActionImpl implements ScanAction {
 
-  @Resource(name = "NodeService")
+  @Autowired
+  @Qualifier("NodeService")
   private NodeService _nodeService;
 
-  @Resource(name = "FileFolderService")
+  @Autowired
+  @Qualifier("FileFolderService")
   private FileFolderService _fileFolderService;
 
-  @Resource(name = "SearchService")
+  @Autowired
+  @Qualifier("SearchService")
   private SearchService _searchService;
 
-  @Resource(name = "policyBehaviourFilter")
+  @Autowired
+  @Qualifier("policyBehaviourFilter")
   private BehaviourFilter _behaviourFilter;
 
   @Autowired

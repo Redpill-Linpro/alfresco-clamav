@@ -1,7 +1,5 @@
 package org.redpill.alfresco.acav.repo.jobs;
 
-import javax.annotation.Resource;
-
 import org.alfresco.repo.admin.RepositoryState;
 import org.alfresco.repo.lock.JobLockService;
 import org.alfresco.repo.lock.LockAcquisitionException;
@@ -13,6 +11,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.redpill.alfresco.acav.repo.model.AcavModel;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -29,7 +28,8 @@ public abstract class ClusteredExecuter {
 
   protected long _lockTTL = DEFAULT_LOCK_TTL;
 
-  @Resource(name = "TransactionService")
+  @Autowired
+  @Qualifier("TransactionService")
   protected TransactionService _transactionService;
 
   @Autowired
@@ -102,8 +102,6 @@ public abstract class ClusteredExecuter {
   /**
    * Attempts to get the lock. If it fails, the current transaction is marked
    * for rollback.
-   * 
-   * @return Returns the lock token
    */
   protected void refreshLock() {
     if (LOG.isDebugEnabled()) {
@@ -137,7 +135,7 @@ public abstract class ClusteredExecuter {
    * Method for checking whether a lock exists or not. There are currently no
    * good ways of doing this, so a try...catch procedure is used.
    * 
-   * @return
+   * @return true if a lock exists, false otherwise
    */
   protected boolean hasLock() {
     boolean hasLock = false;

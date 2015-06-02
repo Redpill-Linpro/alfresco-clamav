@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 
 import org.alfresco.error.AlfrescoRuntimeException;
 import org.alfresco.service.cmr.lock.LockStatus;
@@ -19,6 +18,7 @@ import org.redpill.alfresco.acav.repo.model.AcavModel;
 import org.redpill.alfresco.acav.repo.service.StatusService;
 import org.redpill.alfresco.acav.repo.service.UpdateVirusDatabaseService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component("acav.updateVirusDatabaseService")
@@ -26,10 +26,12 @@ public class UpdateVirusDatabaseServiceImpl extends AbstractService implements U
 
   private static final Logger LOG = Logger.getLogger(UpdateVirusDatabaseServiceImpl.class);
 
-  @Resource(name = "acav.updateVirusDatabaseCommand")
+  @Autowired
+  @Qualifier("acav.updateVirusDatabaseCommand")
   private RuntimeExec _updateCommand;
 
-  @Resource(name = "acav.updateVirusDatabaseCheckCommand")
+  @Autowired
+  @Qualifier("acav.updateVirusDatabaseCheckCommand")
   private RuntimeExec _checkCommand;
 
   private boolean _active;

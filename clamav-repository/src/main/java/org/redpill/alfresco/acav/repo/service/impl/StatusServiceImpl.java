@@ -5,8 +5,6 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
 
-import javax.annotation.Resource;
-
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.util.TempFileProvider;
@@ -14,12 +12,15 @@ import org.redpill.alfresco.acav.repo.model.AcavModel;
 import org.redpill.alfresco.acav.repo.service.ScanService;
 import org.redpill.alfresco.acav.repo.service.StatusService;
 import org.redpill.alfresco.acav.repo.utils.ScanSummary;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
 public class StatusServiceImpl extends AbstractService implements StatusService {
 
-  @Resource(name = "acav.commandLineScanService")
+  @Autowired
+  @Qualifier("acav.commandLineScanService")
   private ScanService _commandLineScanService;
 
   @Override

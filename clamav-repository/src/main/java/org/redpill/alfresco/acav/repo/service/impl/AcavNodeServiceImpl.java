@@ -3,8 +3,6 @@ package org.redpill.alfresco.acav.repo.service.impl;
 import java.util.Calendar;
 import java.util.Date;
 
-import javax.annotation.Resource;
-
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.cmr.lock.LockService;
@@ -18,24 +16,30 @@ import org.apache.commons.lang.StringUtils;
 import org.redpill.alfresco.acav.repo.model.AcavModel;
 import org.redpill.alfresco.acav.repo.service.AcavNodeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component("acav.acavNodeService")
 public class AcavNodeServiceImpl implements AcavNodeService {
 
-  @Resource(name = "NodeService")
+  @Autowired
+  @Qualifier("NodeService")
   private NodeService _nodeService;
 
-  @Resource(name = "FileFolderService")
+  @Autowired
+  @Qualifier("FileFolderService")
   private FileFolderService _fileFolderService;
 
-  @Resource(name = "PermissionService")
+  @Autowired
+  @Qualifier("PermissionService")
   private PermissionService _permissionService;
 
-  @Resource(name = "TransactionService")
+  @Autowired
+  @Qualifier("TransactionService")
   private TransactionService _transactionService;
 
-  @Resource(name = "LockService")
+  @Autowired
+  @Qualifier("LockService")
   private LockService _lockService;
 
   @Autowired
@@ -49,7 +53,7 @@ public class AcavNodeServiceImpl implements AcavNodeService {
   @Override
   public NodeRef getRootNode() {
     NodeRef companyHome = _repository.getCompanyHome();
-    
+
     NodeRef root = _fileFolderService.searchSimple(companyHome, "Alfresco ClamAV");
 
     if (root == null) {

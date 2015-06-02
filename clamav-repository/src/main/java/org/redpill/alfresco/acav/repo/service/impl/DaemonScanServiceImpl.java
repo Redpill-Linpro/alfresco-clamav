@@ -4,8 +4,6 @@ import java.io.File;
 import java.util.Date;
 import java.util.List;
 
-import javax.annotation.Resource;
-
 import org.alfresco.error.AlfrescoRuntimeException;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.site.SiteInfo;
@@ -18,6 +16,7 @@ import org.redpill.alfresco.acav.repo.utils.ScanResult;
 import org.redpill.alfresco.acav.repo.utils.ScanSummary;
 import org.redpill.alfresco.acav.repo.utils.ScanSummary.ScanType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.philvarner.clamavj.ClamScan;
@@ -31,10 +30,12 @@ public class DaemonScanServiceImpl extends AbstractScanService {
   @Autowired
   private ScanHistoryService _scanHistoryService;
 
-  @Resource(name = "SearchService")
+  @Autowired
+  @Qualifier("SearchService")
   private SearchService _searchService;
 
-  @Resource(name = "SiteService")
+  @Autowired
+  @Qualifier("SiteService")
   private SiteService _siteService;
 
   @Autowired
